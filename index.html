@@ -1,1283 +1,1073 @@
+```html
 <!DOCTYPE html>
-<html lang="tr" class="h-full">
+<html lang="tr" class="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Evrensel Çevirici (Arapça Özel Analiz & Akıllı Sözlük)</title>
+    <title>AI Çeviri Studio Pro</title>
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#d97706">
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Amiri:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cream: {
+                            50: '#fdfbf7',
+                            100: '#f9f6f0',
+                            200: '#f1ebd9',
+                            300: '#e5d9be',
+                            400: '#d7c49e',
+                        },
+                        amber: {
+                            800: '#854d0e',
+                            900: '#713f12',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter & Amiri (Arabic) -->
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- PDF.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     </script>
     <style>
-        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-        .font-arabic { font-family: 'Amiri', serif; line-height: 2.2; }
-        .tab-active {
-            border-bottom: 2px solid #6366f1;
-            color: #818cf8;
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fcfaf7;
         }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
-        ::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.3); border-radius: 9999px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.6); }
-        .custom-scroll::-webkit-scrollbar { width: 5px; }
-        .custom-scroll::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.4); border-radius: 8px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.35); border-radius: 8px; }
-        .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.6); 
-        <link rel="manifest" href="manifest.json">
-
-        .formatted-text p {
-            margin-bottom: 0.85em;
-            line-height: 1.7;
+        .arabic-text {
+            font-family: 'Amiri', serif;
+            direction: rtl;
+            line-height: 2.3;
         }
-        .formatted-text p:last-child {
-            margin-bottom: 0;
+        ::-webkit-scrollbar {
+            width: 7px;
+            height: 7px;
         }
-
-        #selectionTooltip {
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+        ::-webkit-scrollbar-track {
+            background: #f1ebd9;
         }
-
-        .filter-checkbox:checked + .filter-card {
-            border-color: #6366f1;
-            background-color: rgba(99, 102, 241, 0.15);
-            color: #ffffff;
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 999px;
         }
-        .filter-checkbox:checked + .filter-card .check-icon {
-            opacity: 1;
-            transform: scale(1);
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-slate-100 min-h-full flex flex-col justify-between antialiased selection:bg-indigo-500 selection:text-white">
+<body class="bg-[#fcfaf7] text-stone-800 min-h-screen flex flex-col antialiased selection:bg-amber-200 selection:text-amber-900">
 
-    <header class="w-full py-3 sm:py-4 px-4 sm:px-6 border-b border-slate-800/60 backdrop-blur-md bg-slate-900/80 sticky top-0 z-50">
-        <div class="max-w-6xl mx-auto flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/30 flex-shrink-0">
-                    <i class="fa-solid fa-language text-lg sm:text-xl text-white"></i>
-                </div>
-                <div>
-                    <h1 class="text-base sm:text-xl font-bold tracking-tight bg-gradient-to-r from-white via-indigo-200 to-indigo-400 bg-clip-text text-transparent">AI Evrensel Çevirici & Sözlük</h1>
-                    <p class="text-[11px] sm:text-xs text-slate-400">Özel Analiz Filtreleri & Akıllı Sözlük</p>
-                </div>
+    <!-- Header Section -->
+    <header class="sticky top-0 z-40 w-full backdrop-blur-md bg-white/90 border-b border-stone-200 px-4 lg:px-8 py-3 flex items-center justify-between shadow-sm">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 via-amber-600 to-amber-700 flex items-center justify-center shadow-md shadow-amber-500/20">
+                <i class="fa-solid fa-language text-xl text-white"></i>
             </div>
-            <div class="flex items-center space-x-2">
-                <button id="openDictionaryBtn" class="text-xs bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 px-3 py-1.5 rounded-xl transition-all flex items-center space-x-1.5 cursor-pointer">
-                    <i class="fa-solid fa-book-bookmark text-indigo-400"></i>
-                    <span class="font-medium">Sözlüğüm</span>
-                    <span id="dictCountBadge" class="bg-indigo-600 text-white text-[10px] px-1.5 py-0.2 rounded-full font-bold ml-1">0</span>
-                </button>
+            <div>
+                <h1 class="font-extrabold text-base sm:text-lg leading-tight text-stone-800 tracking-tight flex items-center gap-2">
+                    AI Çeviri Studio
+                    <span class="text-[10px] font-bold tracking-wider px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300 uppercase">Pro</span>
+                </h1>
+                <p class="text-xs text-stone-500 font-medium">Metin, Görsel, PDF & Sözlük Asistanı</p>
             </div>
+        </div>
+
+        <div class="flex items-center space-x-2">
+            <button id="openHistoryBtn" onclick="openHistoryModal()" class="px-3.5 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 border border-stone-300 text-xs font-semibold text-amber-800 hover:text-amber-900 transition-all flex items-center space-x-1.5 shadow-sm">
+                <i class="fa-solid fa-clock-rotate-left text-amber-600"></i>
+                <span class="hidden sm:inline">Geçmiş</span>
+            </button>
+            <button id="openDictionaryBtn" class="relative group px-3.5 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 hover:border-amber-400 text-xs font-semibold transition-all duration-200 flex items-center space-x-2 text-stone-700 shadow-sm">
+                <i class="fa-solid fa-book-bookmark text-amber-600 group-hover:scale-110 transition-transform"></i>
+                <span>Sözlüğüm</span>
+                <span id="dictBadge" class="bg-amber-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm">0</span>
+            </button>
         </div>
     </header>
 
-    <main class="flex-grow max-w-6xl w-full mx-auto p-3 sm:p-6 md:p-8 flex flex-col gap-4 sm:gap-6">
-        
-        <div class="text-center space-y-1.5 sm:space-y-2 px-2">
-            <h2 class="text-xl sm:text-3xl font-extrabold tracking-tight">İleri Düzey Çeviri, Esnek Filtreler & Analiz</h2>
-            <p class="text-xs sm:text-base text-slate-400 max-w-2xl mx-auto">İstediğiniz analiz seçeneklerini filtreleyerek birleştirin, seçtiğiniz kelimeleri anında çift dilli sözlüğe ekleyin.</p>
+    <main class="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6 lg:p-8 flex flex-col gap-6">
+
+        <!-- Navigation Tabs for Single-Page Switching -->
+        <div class="grid grid-cols-3 gap-2 bg-stone-100/80 p-1.5 rounded-2xl border border-stone-200/80 shadow-inner">
+            <button id="tabText" type="button" onclick="switchTab('text')" class="py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 flex items-center justify-center space-x-2 bg-amber-600 text-white shadow-md shadow-amber-600/20">
+                <i class="fa-solid fa-align-left text-sm"></i>
+                <span>Metin Çevirisi</span>
+            </button>
+            <button id="tabImage" type="button" onclick="switchTab('image')" class="py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 flex items-center justify-center space-x-2 text-stone-600 hover:text-stone-900 hover:bg-stone-200/60">
+                <i class="fa-solid fa-image text-sm"></i>
+                <span>Resim Çevirisi</span>
+            </button>
+            <button id="tabPdf" type="button" onclick="switchTab('pdf')" class="py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 flex items-center justify-center space-x-2 text-stone-600 hover:text-stone-900 hover:bg-stone-200/60">
+                <i class="fa-solid fa-file-pdf text-sm"></i>
+                <span>PDF / Kitap Oku</span>
+            </button>
         </div>
 
-        <!-- Mode Selector Tabs -->
-        <div class="flex justify-start sm:justify-center border-b border-slate-800 max-w-xl mx-auto w-full mb-1 overflow-x-auto no-scrollbar py-1">
-            <div class="flex space-x-1 min-w-full sm:min-w-0 justify-around sm:justify-center">
-                <button id="tabText" class="py-2.5 px-4 text-center text-xs sm:text-sm font-medium transition-colors flex items-center justify-center space-x-2 tab-active whitespace-nowrap cursor-pointer">
-                    <i class="fa-solid fa-align-left"></i>
-                    <span>Metin</span>
-                </button>
-                <button id="tabImage" class="py-2.5 px-4 text-center text-xs sm:text-sm font-medium transition-colors flex items-center justify-center space-x-2 whitespace-nowrap cursor-pointer text-slate-400 hover:text-slate-200">
-                    <i class="fa-solid fa-image"></i>
-                    <span>Resim (Görsel OCR)</span>
-                </button>
-                <button id="tabPdf" class="py-2.5 px-4 text-center text-xs sm:text-sm font-medium transition-colors flex items-center justify-center space-x-2 whitespace-nowrap cursor-pointer text-slate-400 hover:text-slate-200">
-                    <i class="fa-solid fa-book-open"></i>
-                    <span>PDF / Kitap (2000+ Sayfa)</span>
-                </button>
-            </div>
-        </div>
+        <!-- Input & Options Panel -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 items-stretch">
-            
-            <div class="bg-slate-900/90 border border-slate-800/80 rounded-2xl p-4 sm:p-6 shadow-xl backdrop-blur-sm space-y-4 sm:space-y-5 flex flex-col justify-between">
-                <div class="space-y-4">
-                    <!-- Text Mode View -->
-                    <div id="textModeContainer" class="space-y-2 sm:space-y-3">
-                        <div class="flex justify-between items-center">
-                            <label for="textInput" class="block text-xs sm:text-sm font-medium text-slate-300">1. Çevrilecek Metin</label>
-                            <button id="clearTextBtn" class="text-xs text-slate-500 hover:text-slate-300 transition-colors py-1 px-2 cursor-pointer">Temizle</button>
-                        </div>
-                        <textarea id="textInput" rows="5" placeholder="Çevirmek veya analiz etmek istediğiniz metni yazın (Örn: Arapça, İngilizce, Türkçe vb.)..." class="w-full bg-slate-950/60 border border-slate-800 rounded-xl p-3.5 text-xs sm:text-sm text-slate-200 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all resize-none leading-relaxed"></textarea>
-                    </div>
+            <!-- Control & Input Box -->
+            <div class="lg:col-span-5 flex flex-col gap-5 bg-white p-4 sm:p-6 rounded-2xl border border-stone-200 shadow-xl shadow-stone-200/50">
+                
+                <!-- Target Language Select with full extended languages -->
+                <div class="flex flex-col gap-2">
+                    <label for="targetLanguage" class="text-xs font-bold text-stone-600 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-globe text-amber-600"></i>
+                        Hedef Dil Seçimi
+                    </label>
 
-                    <!-- Image Mode View -->
-                    <div id="imageModeContainer" class="space-y-2 sm:space-y-3 hidden">
-                        <label class="block text-xs sm:text-sm font-medium text-slate-300">1. Resim Yükle</label>
-                        <div id="dropzone" class="border-2 border-dashed border-slate-700 hover:border-indigo-500 rounded-xl p-5 sm:p-6 text-center cursor-pointer transition-all duration-200 bg-slate-950/40 group relative overflow-hidden">
-                            <input type="file" id="imageInput" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10">
-                            <div id="uploadPrompt" class="space-y-2 sm:space-y-3 pointer-events-none">
-                                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-indigo-500/10 text-indigo-400 flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
-                                    <i class="fa-solid fa-cloud-arrow-up text-lg sm:text-xl"></i>
-                                </div>
-                                <div class="text-xs sm:text-sm text-slate-300">
-                                    <span class="font-semibold text-indigo-400">Görsel seçin</span> veya buraya sürükleyin
-                                </div>
-                                <p class="text-[11px] text-slate-500">PNG, JPG, WEBP, BMP, GIF</p>
-                            </div>
-                            <div id="previewContainer" class="hidden relative">
-                                <img id="imagePreview" class="max-h-48 sm:max-h-56 mx-auto rounded-lg object-contain shadow-md" alt="Önizleme">
-                                <button type="button" id="removeImage" class="absolute top-1 right-1 sm:top-2 sm:right-2 bg-slate-900/90 hover:bg-red-600 text-white w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-colors z-20 cursor-pointer shadow-lg">
-                                    <i class="fa-solid fa-xmark text-xs sm:text-sm"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- PDF Mode View with Advanced Page Controls -->
-                    <div id="pdfModeContainer" class="space-y-3 hidden">
-                        <label class="block text-xs sm:text-sm font-medium text-slate-300">1. PDF Kitap / Belge Yükle</label>
-                        <div class="border-2 border-dashed border-slate-700 hover:border-indigo-500 rounded-xl p-4 sm:p-5 text-center cursor-pointer transition-all duration-200 bg-slate-950/40 group relative overflow-hidden">
-                            <input type="file" id="pdfInput" accept="application/pdf" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10">
-                            <div id="pdfUploadPrompt" class="space-y-2 pointer-events-none">
-                                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-indigo-500/10 text-indigo-400 flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
-                                    <i class="fa-solid fa-file-pdf text-lg sm:text-xl"></i>
-                                </div>
-                                <div class="text-xs sm:text-sm text-slate-300">
-                                    <span class="font-semibold text-indigo-400">PDF seçin</span> (Metinli veya Taranmış Sayfalar)
-                                </div>
-                                <p class="text-[11px] text-slate-500">Arapça Kitaplar, Yazmalar & Makaleler</p>
-                            </div>
-                            <div id="pdfPreviewContainer" class="hidden space-y-2">
-                                <div class="w-9 h-9 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center mx-auto">
-                                    <i class="fa-solid fa-book-bookmark text-base"></i>
-                                </div>
-                                <p id="pdfFileName" class="text-xs sm:text-sm font-semibold text-slate-200 truncate px-2"></p>
-                                <p id="pdfPageCountInfo" class="text-[11px] text-indigo-300 font-medium"></p>
-                                <button type="button" id="removePdf" class="text-xs text-red-400 hover:text-red-300 underline cursor-pointer py-1">Farklı PDF Seç</button>
-                            </div>
-                        </div>
-
-                        <!-- PDF Page Selection Controls -->
-                        <div id="pdfPageControls" class="hidden bg-slate-950/80 p-3.5 rounded-xl border border-slate-800/80 space-y-3">
-                            <div class="flex items-center justify-between text-xs font-semibold text-slate-300 border-b border-slate-800 pb-2">
-                                <span><i class="fa-solid fa-sliders text-indigo-400 mr-1.5"></i> Sayfa Seçim Alanı</span>
-                                <span id="pdfTotalBadge" class="bg-indigo-900/60 text-indigo-300 text-[10px] px-2 py-0.5 rounded-full border border-indigo-700/50">0 Sayfa</span>
-                            </div>
-
-                            <div class="space-y-1.5">
-                                <label class="block text-[11px] text-slate-400">Çevrilecek Sayfa:</label>
-                                <div class="flex items-center space-x-2">
-                                    <button id="prevPageBtn" type="button" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-3 py-2 rounded-lg transition-colors cursor-pointer flex items-center justify-center">
-                                        <i class="fa-solid fa-chevron-left"></i>
-                                    </button>
-                                    <div class="flex items-center space-x-1.5 flex-grow">
-                                        <input type="number" id="pdfStartPage" min="1" value="1" class="w-full bg-slate-900 border border-slate-700 rounded-lg py-1.5 px-2 text-center text-xs text-slate-100 font-bold focus:outline-none focus:border-indigo-500">
-                                        <span class="text-xs text-slate-500">/</span>
-                                        <span id="pdfTotalPagesDisplay" class="text-xs text-slate-400 font-medium">1</span>
-                                    </div>
-                                    <button id="nextPageBtn" type="button" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-3 py-2 rounded-lg transition-colors cursor-pointer flex items-center justify-center">
-                                        <i class="fa-solid fa-chevron-right"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="pt-1 border-t border-slate-800/60">
-                                <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer">
-                                    <input type="checkbox" id="rangeModeToggle" class="rounded bg-slate-900 border-slate-700 text-indigo-600 focus:ring-indigo-500">
-                                    <span>Çoklu Sayfa Aralığı Çevir (Örn: 1-3)</span>
-                                </label>
-                                <div id="rangeInputGroup" class="hidden mt-2 flex items-center space-x-2">
-                                    <span class="text-[11px] text-slate-400">Bitiş Sayfası:</span>
-                                    <input type="number" id="pdfEndPage" min="1" value="1" class="w-24 bg-slate-900 border border-slate-700 rounded-lg py-1 px-2 text-center text-xs text-slate-100 font-bold focus:outline-none focus:border-indigo-500">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Filter / Feature Multi-Select System -->
-                    <div class="space-y-2">
-                        <div class="flex items-center justify-between">
-                            <label class="block text-xs sm:text-sm font-medium text-slate-300">2. Çeviri & Analiz Seçenekleri (Çoklu Filtre)</label>
-                            <button id="selectAllFiltersBtn" class="text-[11px] text-indigo-400 hover:text-indigo-300 transition-colors py-0.5 px-1.5 cursor-pointer">Tümünü Seç</button>
-                        </div>
-                        
-                        <div class="grid grid-cols-2 gap-2 sm:gap-2.5">
-                            <!-- Option: Toplu Mana -->
-                            <label class="cursor-pointer relative">
-                                <input type="checkbox" name="analysisFilter" value="full_mana" class="filter-checkbox hidden" checked>
-                                <div class="filter-card border border-slate-800 bg-slate-950/60 rounded-xl p-2.5 transition-all flex items-center space-x-2 text-slate-300 hover:border-slate-700">
-                                    <div class="w-4 h-4 rounded border border-indigo-500/50 flex items-center justify-center flex-shrink-0 bg-slate-900">
-                                        <i class="fa-solid fa-check text-[10px] text-indigo-400 opacity-0 check-icon transition-all scale-75"></i>
-                                    </div>
-                                    <div class="truncate">
-                                        <p class="text-xs font-semibold leading-tight">📝 Toplu Mana</p>
-                                        <p class="text-[10px] text-slate-500 truncate">Akıcı çeviri</p>
-                                    </div>
-                                </div>
-                            </label>
-
-                            <!-- Option: Kırık Mana -->
-                            <label class="cursor-pointer relative">
-                                <input type="checkbox" name="analysisFilter" value="broken_mana" class="filter-checkbox hidden">
-                                <div class="filter-card border border-slate-800 bg-slate-950/60 rounded-xl p-2.5 transition-all flex items-center space-x-2 text-slate-300 hover:border-slate-700">
-                                    <div class="w-4 h-4 rounded border border-indigo-500/50 flex items-center justify-center flex-shrink-0 bg-slate-900">
-                                        <i class="fa-solid fa-check text-[10px] text-indigo-400 opacity-0 check-icon transition-all scale-75"></i>
-                                    </div>
-                                    <div class="truncate">
-                                        <p class="text-xs font-semibold leading-tight">📖 Kırık Mana</p>
-                                        <p class="text-[10px] text-slate-500 truncate">Kelime kelime</p>
-                                    </div>
-                                </div>
-                            </label>
-
-                            <!-- Option: İrab Analizi -->
-                            <label class="cursor-pointer relative">
-                                <input type="checkbox" name="analysisFilter" value="irab" class="filter-checkbox hidden">
-                                <div class="filter-card border border-slate-800 bg-slate-950/60 rounded-xl p-2.5 transition-all flex items-center space-x-2 text-slate-300 hover:border-slate-700">
-                                    <div class="w-4 h-4 rounded border border-indigo-500/50 flex items-center justify-center flex-shrink-0 bg-slate-900">
-                                        <i class="fa-solid fa-check text-[10px] text-indigo-400 opacity-0 check-icon transition-all scale-75"></i>
-                                    </div>
-                                    <div class="truncate">
-                                        <p class="text-xs font-semibold leading-tight">🔍 İrab Analizi</p>
-                                        <p class="text-[10px] text-slate-500 truncate">Dil bilgisi & tahlil</p>
-                                    </div>
-                                </div>
-                            </label>
-
-                            <!-- Option: Harekeleme -->
-                            <label class="cursor-pointer relative">
-                                <input type="checkbox" name="analysisFilter" value="harakat" class="filter-checkbox hidden">
-                                <div class="filter-card border border-slate-800 bg-slate-950/60 rounded-xl p-2.5 transition-all flex items-center space-x-2 text-slate-300 hover:border-slate-700">
-                                    <div class="w-4 h-4 rounded border border-indigo-500/50 flex items-center justify-center flex-shrink-0 bg-slate-900">
-                                        <i class="fa-solid fa-check text-[10px] text-indigo-400 opacity-0 check-icon transition-all scale-75"></i>
-                                    </div>
-                                    <div class="truncate">
-                                        <p class="text-xs font-semibold leading-tight">✍️ Harekeleme</p>
-                                        <p class="text-[10px] text-slate-500 truncate">Tam diyakritik ekle</p>
-                                    </div>
-                                </div>
-                            </label>
-
-                            <!-- Option: Derin Gramer -->
-                            <label class="cursor-pointer relative">
-                                <input type="checkbox" name="analysisFilter" value="grammar_analysis" class="filter-checkbox hidden">
-                                <div class="filter-card border border-slate-800 bg-slate-950/60 rounded-xl p-2.5 transition-all flex items-center space-x-2 text-slate-300 hover:border-slate-700">
-                                    <div class="w-4 h-4 rounded border border-indigo-500/50 flex items-center justify-center flex-shrink-0 bg-slate-900">
-                                        <i class="fa-solid fa-check text-[10px] text-indigo-400 opacity-0 check-icon transition-all scale-75"></i>
-                                    </div>
-                                    <div class="truncate">
-                                        <p class="text-xs font-semibold leading-tight">🧠 Cümle Analizi</p>
-                                        <p class="text-[10px] text-slate-500 truncate">Yapı & Edatlar</p>
-                                    </div>
-                                </div>
-                            </label>
-
-                            <!-- Option: Metin Özeti -->
-                            <label class="cursor-pointer relative">
-                                <input type="checkbox" name="analysisFilter" value="summary" class="filter-checkbox hidden">
-                                <div class="filter-card border border-slate-800 bg-slate-950/60 rounded-xl p-2.5 transition-all flex items-center space-x-2 text-slate-300 hover:border-slate-700">
-                                    <div class="w-4 h-4 rounded border border-indigo-500/50 flex items-center justify-center flex-shrink-0 bg-slate-900">
-                                        <i class="fa-solid fa-check text-[10px] text-indigo-400 opacity-0 check-icon transition-all scale-75"></i>
-                                    </div>
-                                    <div class="truncate">
-                                        <p class="text-xs font-semibold leading-tight">📌 Metin Özeti</p>
-                                        <p class="text-[10px] text-slate-500 truncate">Ana fikir maddeleri</p>
-                                    </div>
-                                </div>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Target Language Selection -->
-                    <div>
-                        <label for="targetLanguage" class="block text-xs sm:text-sm font-medium text-slate-300 mb-1.5">3. Hedef Dil</label>
-                        <div class="relative">
-                            <select id="targetLanguage" class="w-full bg-slate-950/60 border border-slate-800 rounded-xl px-3.5 py-2.5 sm:py-3 text-xs sm:text-sm text-slate-200 appearance-none focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all cursor-pointer">
-                                <option value="Turkish">Türkçe (Doğal & Gramer Uyumlu)</option>
-                                <option value="Arabic">Arapça (العربية - Fasih)</option>
-                                <option value="English">İngilizce (English)</option>
-                                <option value="German">Almanca (Deutsch)</option>
-                                <option value="French">Fransızca (Français)</option>
-                                <option value="Spanish">İspanyolca (Español)</option>
-                                <option value="Russian">Rusça (Русский)</option>
-                                <option value="Japanese">Japonca (日本語)</option>
-                            </select>
-                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-400">
-                                <i class="fa-solid fa-chevron-down text-xs"></i>
-                            </div>
-                        </div>
-                    </div>
+                    <select id="targetLanguage" class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-stone-800 font-medium focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-colors">
+                        <optgroup label="⚡ Popüler Diller">
+                            <option value="Turkish" selected>Türkçe (Türkiye)</option>
+                            <option value="Arabic">Arapça (العربية)</option>
+                            <option value="English">İngilizce (English)</option>
+                            <option value="German">Almanca (Deutsch)</option>
+                            <option value="French">Fransızca (Français)</option>
+                            <option value="Spanish">İspanyolca (Español)</option>
+                            <option value="Russian">Rusça (Русский)</option>
+                        </optgroup>
+                        <optgroup label="🏹 Türk Dilleri ve Lehçeleri">
+                            <option value="Uzbek">Özbekçe (Oʻzbekcha)</option>
+                            <option value="Kazakh">Kazakça (Qazaqşa)</option>
+                            <option value="Kyrgyz">Kırgızca (Кыргызча)</option>
+                            <option value="Azerbaijani">Azerbaycan Türkçesi (Azərbaycan)</option>
+                            <option value="Turkmen">Türkmence (Türkmençe)</option>
+                            <option value="Uyghur">Uygurca (ئۇيغۇرچە)</option>
+                            <option value="Tatar">Tatarca (Татарча)</option>
+                            <option value="Ottoman">Osmanlı Türkçesi (عثمانليجه)</option>
+                        </optgroup>
+                        <optgroup label="🌍 Afrika & Orta Doğu Dilleri">
+                            <option value="Swahili">Swahili (Kiswahili)</option>
+                            <option value="Amharic">Amharca (አማርኛ)</option>
+                            <option value="Hausa">Hausa (Harshen Hausa)</option>
+                            <option value="Yoruba">Yorubaca (Èdè Yorùbá)</option>
+                            <option value="Zulu">Zuluca (isiZulu)</option>
+                            <option value="Somali">Somalice (Soomaaliga)</option>
+                            <option value="Persian">Farsça (فارسی)</option>
+                            <option value="Urdu">Urduca (اردو)</option>
+                            <option value="Pashto">Peştuca (پښتو)</option>
+                            <option value="Kurdish">Kürtçe (Kurdî / كوردی)</option>
+                        </optgroup>
+                        <optgroup label="🌏 Asya & Pasifik">
+                            <option value="Japanese">Japonca (日本語)</option>
+                            <option value="Chinese">Çince (中文)</option>
+                            <option value="Korean">Korece (한국어)</option>
+                            <option value="Hindi">Hintçe (हिन्दी)</option>
+                            <option value="Bengali">Bengalce (বাংলা)</option>
+                            <option value="Tajik">Tacikçe (Тоҷикӣ)</option>
+                            <option value="Mongolian">Moğolca (Монгол)</option>
+                            <option value="Thai">Tayca (ไทย)</option>
+                            <option value="Vietnamese">Vietnamca (Tiếng Việt)</option>
+                            <option value="Indonesian">Endonezyaca (Bahasa Indonesia)</option>
+                            <option value="Malay">Malayca (Bahasa Melayu)</option>
+                        </optgroup>
+                        <optgroup label="🏛️ Diğer Avrupa & Klasik Diller">
+                            <option value="Italian">İtalyanca (Italiano)</option>
+                            <option value="Portuguese">Portekizce (Português)</option>
+                            <option value="Dutch">Flemenkçe (Nederlands)</option>
+                            <option value="Polish">Lehçe (Polski)</option>
+                            <option value="Greek">Yunanca (Ελληνικά)</option>
+                            <option value="Ukrainian">Ukraynaca (Українська)</option>
+                            <option value="Latin">Latince (Lingua Latina)</option>
+                        </optgroup>
+                    </select>
                 </div>
 
-                <!-- Submit Button -->
-                <button id="translateBtn" class="w-full mt-4 bg-indigo-600 hover:bg-indigo-500 active:scale-[0.99] disabled:bg-slate-800 disabled:text-slate-500 text-white font-medium py-3 px-4 rounded-xl shadow-lg shadow-indigo-600/20 transition-all duration-200 flex items-center justify-center space-x-2 cursor-pointer disabled:cursor-not-allowed text-xs sm:text-sm">
-                    <i class="fa-solid fa-wand-magic-sparkles text-indigo-200"></i>
-                    <span>Analiz Et ve Çevir</span>
-                </button>
-            </div>
-
-            <div id="resultCard" class="bg-slate-900/90 border border-slate-800/80 rounded-2xl p-4 sm:p-6 shadow-2xl backdrop-blur-md flex flex-col justify-between min-h-[460px] relative overflow-hidden transition-all duration-300">
-                <div class="absolute -top-24 -right-24 w-60 h-60 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none"></div>
-                <div class="absolute -bottom-24 -left-24 w-60 h-60 bg-purple-600/10 rounded-full blur-3xl pointer-events-none"></div>
-
-                <!-- Card Header -->
-                <div class="flex items-center justify-between border-b border-slate-800/80 pb-3 z-10">
-                    <div class="flex items-center space-x-2">
-                        <div class="w-7 h-7 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
-                            <i class="fa-solid fa-sparkles text-xs"></i>
-                        </div>
-                        <h3 class="font-semibold text-xs sm:text-sm text-slate-100">Çeviri & Analiz Paneli</h3>
-                    </div>
-
-                    <!-- Action Controls -->
-                    <div id="actionButtons" class="hidden flex items-center space-x-1.5 sm:space-x-2">
-                        <button id="viewToggleBtn" title="Görünümü Değiştir (Yan Yana / Alt Alta)" class="text-xs bg-slate-950/80 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white px-2.5 py-1.5 rounded-lg transition-all flex items-center space-x-1 cursor-pointer">
-                            <i id="viewToggleIcon" class="fa-solid fa-columns"></i>
-                            <span id="viewToggleText" class="hidden sm:inline text-[11px] font-medium">Yan Yana</span>
-                        </button>
-
-                        <div class="flex items-center bg-slate-950/80 border border-slate-800 rounded-lg p-0.5">
-                            <button id="fontDecrease" title="Yazı Boyutunu Küçült" class="text-xs text-slate-400 hover:text-white px-2 py-1 rounded transition-colors cursor-pointer">A-</button>
-                            <span class="text-[10px] text-slate-700">|</span>
-                            <button id="fontIncrease" title="Yazı Boyutunu Büyüt" class="text-xs text-slate-400 hover:text-white px-2 py-1 rounded transition-colors cursor-pointer">A+</button>
-                        </div>
-
-                        <button id="speakBtn" title="Sesli Oku / Durdur" class="text-xs bg-slate-950/80 border border-slate-800 hover:border-indigo-500/50 hover:bg-indigo-600/20 text-slate-300 hover:text-indigo-300 p-2 rounded-lg transition-all flex items-center justify-center w-8 h-8 cursor-pointer">
-                            <i id="speakIcon" class="fa-solid fa-volume-high"></i>
-                        </button>
-
-                        <button id="copyBtn" title="Metni Kopyala" class="text-xs bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-lg shadow-md shadow-indigo-600/20 transition-all flex items-center space-x-1.5 cursor-pointer font-medium">
-                            <i class="fa-regular fa-copy text-xs"></i>
-                            <span class="hidden sm:inline">Kopyala</span>
-                        </button>
-
-                        <button id="downloadBtn" title="Çeviriyi İndir (.txt)" class="text-xs bg-slate-950/80 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white p-2 rounded-lg transition-colors flex items-center justify-center w-8 h-8 cursor-pointer">
-                            <i class="fa-solid fa-download"></i>
+                <!-- Analysis Options Checklist -->
+                <div class="flex flex-col gap-2.5">
+                    <div class="flex items-center justify-between">
+                        <label class="text-xs font-bold text-stone-600 uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-solid fa-list-check text-amber-600"></i>
+                            Analiz Seçenekleri
+                        </label>
+                        <button type="button" onclick="toggleAllFilters()" class="text-[11px] font-bold text-amber-700 hover:text-amber-900 underline">
+                            Tümünü Seç / Kaldır
                         </button>
                     </div>
-                </div>
-
-                <!-- Loading State -->
-                <div id="loadingState" class="hidden flex-grow flex flex-col items-center justify-center space-y-4 py-12 z-10">
-                    <div class="relative flex items-center justify-center">
-                        <div class="w-14 h-14 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
-                        <i class="fa-solid fa-language text-indigo-400 absolute text-sm"></i>
-                    </div>
-                    <div class="text-center space-y-1">
-                        <p class="text-xs sm:text-sm text-slate-100 font-semibold animate-pulse" id="loadingText">Çeviri ve analiz yapılıyor...</p>
-                        <p class="text-[11px] text-slate-400" id="loadingSubtext">Seçilen filtreler işleniyor</p>
-                    </div>
-                </div>
-
-                <!-- Empty State -->
-                <div id="emptyState" class="flex-grow flex flex-col items-center justify-center text-center space-y-3 py-12 text-slate-500 px-4 z-10">
-                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-b from-slate-800/80 to-slate-900/80 border border-slate-800 flex items-center justify-center text-indigo-400 text-2xl mb-1 shadow-inner">
-                        <i class="fa-solid fa-wand-magic-sparkles"></i>
-                    </div>
-                    <p class="text-xs sm:text-sm max-w-xs leading-relaxed text-slate-400">İstediğiniz filtreleri (kırık mana, toplu mana, irab, vb.) seçin ve çevirinizi anında başlatın.</p>
-                </div>
-
-                <!-- Result Content Block -->
-                <div id="resultContent" class="hidden flex-grow space-y-3 my-3 flex flex-col justify-between z-10">
                     
-                    <div class="flex items-center justify-between text-[11px] bg-slate-950/70 backdrop-blur-md px-3.5 py-2 rounded-xl border border-slate-800/80 shadow-inner">
-                        <div id="detectedLangBadge" class="flex items-center gap-2 font-medium text-indigo-300">
-                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                            <span id="detectedLangText">Dil Algılandı</span>
-                        </div>
-                        <div class="flex items-center space-x-3 font-mono text-[10px]">
-                            <span id="charCountBadge" class="text-slate-400"><i class="fa-regular fa-file-lines text-slate-500 mr-1"></i>0 karakter</span>
-                            <span id="wordCountBadge" class="text-slate-300 font-semibold bg-indigo-950/60 border border-indigo-800/40 px-2 py-0.5 rounded-md"><i class="fa-solid fa-font text-indigo-400 mr-1"></i>0 kelime</span>
-                            <span id="resultPageBadge" class="text-indigo-300 font-sans"></span>
-                        </div>
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <label class="flex items-center p-2.5 bg-stone-50 hover:bg-amber-50/60 border border-stone-200 rounded-xl cursor-pointer transition-all select-none">
+                            <input type="checkbox" id="filterToplu" value="Toplu Mana (Genel Anlam Akışı)" checked class="w-4 h-4 text-amber-600 rounded border-stone-300 focus:ring-amber-500">
+                            <span class="ml-2 font-semibold text-stone-700">Toplu Mana</span>
+                        </label>
+
+                        <label class="flex items-center p-2.5 bg-stone-50 hover:bg-amber-50/60 border border-stone-200 rounded-xl cursor-pointer transition-all select-none">
+                            <input type="checkbox" id="filterKirik" value="Kırık Mana (Kelime Kelime Karşılık)" checked class="w-4 h-4 text-amber-600 rounded border-stone-300 focus:ring-amber-500">
+                            <span class="ml-2 font-semibold text-stone-700">Kırık Mana</span>
+                        </label>
+
+                        <label class="flex items-center p-2.5 bg-stone-50 hover:bg-amber-50/60 border border-stone-200 rounded-xl cursor-pointer transition-all select-none">
+                            <input type="checkbox" id="filterHareke" value="Tam Harekeleme (Arapça / Metin İşaretleri)" class="w-4 h-4 text-amber-600 rounded border-stone-300 focus:ring-amber-500">
+                            <span class="ml-2 font-semibold text-stone-700">Harekeleme</span>
+                        </label>
+
+                        <label class="flex items-center p-2.5 bg-stone-50 hover:bg-amber-50/60 border border-stone-200 rounded-xl cursor-pointer transition-all select-none">
+                            <input type="checkbox" id="filterIrab" value="İrab / Sentaks Gramer Analizi" class="w-4 h-4 text-amber-600 rounded border-stone-300 focus:ring-amber-500">
+                            <span class="ml-2 font-semibold text-stone-700">İrab Analizi</span>
+                        </label>
+
+                        <label class="flex items-center p-2.5 bg-stone-50 hover:bg-amber-50/60 border border-stone-200 rounded-xl cursor-pointer transition-all select-none">
+                            <input type="checkbox" id="filterGramer" value="Kök ve Dilbilgisi Açıklaması" class="w-4 h-4 text-amber-600 rounded border-stone-300 focus:ring-amber-500">
+                            <span class="ml-2 font-semibold text-stone-700">Cümle İncelemesi</span>
+                        </label>
+
+                        <label class="flex items-center p-2.5 bg-stone-50 hover:bg-amber-50/60 border border-stone-200 rounded-xl cursor-pointer transition-all select-none">
+                            <input type="checkbox" id="filterOzet" value="Kısa Metin Özeti" class="w-4 h-4 text-amber-600 rounded border-stone-300 focus:ring-amber-500">
+                            <span class="ml-2 font-semibold text-stone-700">Metin Özeti</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="systemRole" class="block text-xs font-bold text-stone-600 mb-1.5 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-sliders text-amber-600"></i>
+                        Çeviri Üslubu
+                    </label>
+                    <select id="systemRole" class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-stone-800 font-medium focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-colors">
+                        <option value="Doğal ve Akıcı">Doğal ve Akıcı (Günlük)</option>
+                        <option value="Akademik ve Edebi">Akademik ve Edebi</option>
+                        <option value="Birebir Kelime Kelime">Birebir (Mümkün Olduğunca Sadık)</option>
+                        <option value="Sadeleştirilmiş Basit">Sadeleştirilmiş Basit Dil</option>
+                    </select>
+                </div>
+
+                <!-- 1. TEXT INPUT -->
+                <div id="areaText" class="flex flex-col gap-2">
+                    <label for="textInput" class="text-xs font-bold text-stone-600 uppercase tracking-wider flex items-center justify-between">
+                        <span>Çevrilecek Metin</span>
+                        <span id="charCount" class="text-[11px] text-stone-400 font-normal">0 karakter</span>
+                    </label>
+                    <textarea id="textInput" rows="7" oninput="updateCharCount()" placeholder="Çevirmek istediğiniz metni buraya yapıştırın veya yazın..." class="w-full bg-stone-50 border border-stone-300 rounded-xl p-3.5 text-xs sm:text-sm text-stone-800 placeholder-stone-400 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-colors resize-y min-h-[160px]"></textarea>
+                </div>
+
+                <!-- 2. IMAGE INPUT -->
+                <div id="areaImage" class="hidden flex-col gap-2">
+                    <label class="text-xs font-bold text-stone-600 uppercase tracking-wider">Resim Yükle</label>
+                    <div id="imageDropZone" onclick="document.getElementById('imageFileInput').click()" class="border-2 border-dashed border-stone-300 hover:border-amber-500 bg-stone-50 hover:bg-stone-100/60 rounded-2xl p-6 text-center cursor-pointer transition-all flex flex-col items-center justify-center min-h-[160px]">
+                        <i class="fa-solid fa-cloud-arrow-up text-3xl text-amber-600 mb-2"></i>
+                        <p class="text-xs sm:text-sm font-semibold text-stone-700">Resim seçin veya buraya sürükleyin</p>
+                        <p class="text-[11px] text-stone-400 mt-1">PNG, JPG, WEBP desteklenir</p>
+                        <input type="file" id="imageFileInput" accept="image/*" class="hidden" onchange="handleImageSelected(event)">
+                    </div>
+                    <div id="imagePreviewContainer" class="hidden relative mt-2 rounded-xl overflow-hidden border border-stone-200 bg-stone-50 max-h-48 flex justify-center">
+                        <img id="imagePreview" class="object-contain max-h-48 w-full" src="" alt="Yüklenen Görsel">
+                        <button onclick="clearSelectedImage()" class="absolute top-2 right-2 bg-rose-600 hover:bg-rose-700 text-white rounded-full p-1.5 w-7 h-7 flex items-center justify-center text-xs transition-colors shadow-md">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 3. PDF INPUT -->
+                <div id="areaPdf" class="hidden flex-col gap-3">
+                    <label class="text-xs font-bold text-stone-600 uppercase tracking-wider">PDF Doküman Yükle</label>
+                    <div id="pdfDropZone" onclick="document.getElementById('pdfFileInput').click()" class="border-2 border-dashed border-stone-300 hover:border-amber-500 bg-stone-50 hover:bg-stone-100/60 rounded-2xl p-5 text-center cursor-pointer transition-all flex flex-col items-center justify-center">
+                        <i class="fa-solid fa-file-pdf text-3xl text-rose-500 mb-2"></i>
+                        <p class="text-xs sm:text-sm font-semibold text-stone-700">PDF dosyanızı seçin</p>
+                        <p id="pdfFileName" class="text-[11px] text-amber-700 font-semibold mt-1 truncate max-w-[200px]">Henüz dosya seçilmedi</p>
+                        <input type="file" id="pdfFileInput" accept="application/pdf" class="hidden" onchange="handlePdfSelected(event)">
                     </div>
 
-                    <div id="translationBoxesContainer" class="grid grid-cols-1 gap-3 flex-grow transition-all">
-                        <div id="originalTextWrapper" class="flex flex-col bg-slate-950/70 border border-slate-800/90 rounded-xl overflow-hidden group focus-within:border-slate-700 transition-all">
-                            <div class="flex justify-between items-center px-3.5 py-2 bg-slate-900/60 border-b border-slate-800/80">
-                                <span id="originalTextHeaderTitle" class="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                                    <i class="fa-solid fa-align-left text-slate-500 text-[10px]"></i> Orijinal Metin (Kaynak)
-                                </span>
-                                <button id="copyOriginalBtn" title="Orijinal metni kopyala" class="text-[10px] text-slate-500 hover:text-slate-300 transition-colors cursor-pointer">
-                                    <i class="fa-regular fa-copy mr-1"></i>Kopyala
-                                </button>
-                            </div>
-                            <div id="originalText" class="p-3.5 custom-scroll formatted-text text-xs sm:text-sm text-slate-300 max-h-48 sm:max-h-60 overflow-y-auto leading-relaxed select-text font-normal flex-grow"></div>
+                    <!-- PDF Page Navigation Controls -->
+                    <div id="pdfControls" class="hidden flex-col gap-2 bg-stone-50 p-3 rounded-xl border border-stone-200 text-xs">
+                        <div class="flex items-center justify-between text-stone-600 font-medium">
+                            <span>Toplam Sayfa: <strong id="pdfTotalPages" class="text-amber-700">0</strong></span>
+                            <span>Mevcut Sayfa: <strong id="pdfCurrentPageNum" class="text-stone-900">1</strong></span>
                         </div>
-                        
-                        <div id="translatedTextWrapper" class="flex flex-col bg-gradient-to-b from-indigo-950/30 to-slate-950/80 border border-indigo-500/30 rounded-xl overflow-hidden shadow-lg group focus-within:border-indigo-500/60 transition-all relative">
-                            <div class="flex justify-between items-center px-3.5 py-2 bg-indigo-950/50 border-b border-indigo-500/20">
-                                <span class="text-[11px] font-bold text-indigo-300 uppercase tracking-wider flex items-center gap-1.5">
-                                    <i class="fa-solid fa-sparkles text-indigo-400 text-[10px]"></i> Seçilen Filtrelere Göre Analiz Çıktısı
-                                </span>
-                                <span class="text-[10px] text-indigo-300 bg-indigo-950/80 border border-indigo-800/50 px-2 py-0.5 rounded-full font-medium">
-                                    <i class="fa-solid fa-i-cursor mr-1"></i>Kelime Seçip Sözlüğe Ekle
-                                </span>
-                            </div>
-                            <div id="translatedText" class="p-3.5 custom-scroll formatted-text text-xs sm:text-sm text-slate-100 max-h-60 sm:max-h-80 overflow-y-auto leading-relaxed font-medium select-text shadow-inner flex-grow"></div>
+                        <div class="flex items-center space-x-2 pt-1">
+                            <button type="button" onclick="changePdfPage(-1)" class="flex-1 py-1.5 bg-stone-200 hover:bg-stone-300 rounded-lg text-stone-700 transition-colors font-semibold flex items-center justify-center space-x-1">
+                                <i class="fa-solid fa-chevron-left text-[10px]"></i>
+                                <span>Önceki</span>
+                            </button>
+                            <input type="number" id="pdfPageInput" min="1" value="1" class="w-16 bg-white border border-stone-300 rounded-lg py-1 px-2 text-center text-stone-800 font-semibold focus:outline-none focus:border-amber-500">
+                            <button type="button" onclick="jumpToPdfPage()" class="py-1.5 px-3 bg-amber-600 hover:bg-amber-700 rounded-lg text-white font-semibold">Git</button>
+                            <button type="button" onclick="changePdfPage(1)" class="flex-1 py-1.5 bg-stone-200 hover:bg-stone-300 rounded-lg text-stone-700 transition-colors font-semibold flex items-center justify-center space-x-1">
+                                <span>Sonraki</span>
+                                <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
 
-                <div id="resultFooterNote" class="hidden pt-2.5 border-t border-slate-800/60 text-[10px] text-slate-400 flex justify-between items-center z-10">
-                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-shield-halved text-indigo-400"></i> %100 Bağlamsal & Gramer Uyumlu Çeviri</span>
-                    <span id="syncScrollIndicator" class="text-slate-500 hidden sm:inline"><i class="fa-solid fa-arrows-up-down mr-1"></i>Metinden kelime seçip sözlüğe ekleyebilirsiniz</span>
+                <!-- Run Process Button -->
+                <button id="processBtn" onclick="runTranslationProcess()" class="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-amber-600 via-amber-500 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white font-bold text-sm shadow-lg shadow-amber-600/20 transition-all duration-200 flex items-center justify-center space-x-2 group active:scale-[0.99]">
+                    <i class="fa-solid fa-wand-magic-sparkles group-hover:rotate-12 transition-transform"></i>
+                    <span id="processBtnText">Çeviri ve Analizi Başlat</span>
+                </button>
+
+            </div>
+
+            <!-- Output Box Separated into Plain Translation & Analysis -->
+            <div class="lg:col-span-7 flex flex-col gap-4">
+
+                <!-- Controls Bar above Output -->
+                <div class="flex flex-wrap items-center justify-between gap-2 bg-white p-3 rounded-2xl border border-stone-200 shadow-sm">
+                    <div class="flex items-center space-x-1.5 text-xs font-semibold">
+                        <span class="text-stone-500 pl-1">Yazı Boyutu:</span>
+                        <button onclick="adjustFontSize(-1)" class="w-7 h-7 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700 transition-colors border border-stone-200">-</button>
+                        <button onclick="adjustFontSize(1)" class="w-7 h-7 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700 transition-colors border border-stone-200">+</button>
+                    </div>
+
+                    <div class="flex items-center space-x-2">
+                        <button id="ttsBtn" onclick="speakTranslation()" class="px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 border border-stone-300 text-xs text-amber-800 font-semibold flex items-center space-x-1.5 transition-colors">
+                            <i id="ttsIcon" class="fa-solid fa-volume-high text-amber-600"></i>
+                            <span id="ttsText">Sesli Oku</span>
+                        </button>
+                        <button onclick="downloadOutput()" class="px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 border border-stone-300 text-xs text-stone-700 font-semibold flex items-center space-x-1.5 transition-colors">
+                            <i class="fa-solid fa-download"></i>
+                            <span class="hidden sm:inline">İndir</span>
+                        </button>
+                        <button onclick="copyOutput()" class="px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-xs text-white font-semibold flex items-center space-x-1.5 transition-colors shadow-sm">
+                            <i class="fa-solid fa-copy"></i>
+                            <span>Kopyala</span>
+                        </button>
+                    </div>
                 </div>
+
+                <!-- Loading State Indicator -->
+                <div id="loadingIndicator" class="hidden flex-col items-center justify-center p-12 bg-white rounded-2xl border border-stone-200 text-center min-h-[360px] shadow-sm">
+                    <div class="relative w-16 h-16 mb-4">
+                        <div class="absolute inset-0 rounded-full border-4 border-amber-200"></div>
+                        <div class="absolute inset-0 rounded-full border-4 border-amber-600 border-t-transparent animate-spin"></div>
+                    </div>
+                    <p class="text-sm font-bold text-stone-800 mb-1">Yapay Zeka İşliyor...</p>
+                    <p class="text-xs text-stone-500">Çeviri ve istenen analizler ayrı panellerde hazırlanıyor.</p>
+                </div>
+
+                <!-- Output Panel Split into Plain Translation & Analysis Result -->
+                <div id="outputContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    
+                    <!-- Direct Plain Translation Result Box -->
+                    <div class="flex flex-col bg-white rounded-2xl border border-stone-200 overflow-hidden min-h-[360px] shadow-md">
+                        <div class="bg-stone-50 px-4 py-3 border-b border-stone-200 flex items-center justify-between">
+                            <span class="text-xs font-bold text-stone-800 flex items-center space-x-2">
+                                <i class="fa-solid fa-language text-amber-600"></i>
+                                <span>Yalın Çeviri Sonucu</span>
+                            </span>
+                        </div>
+                        <div id="translatedTextContent" class="p-4 text-xs sm:text-sm text-stone-800 leading-relaxed overflow-y-auto max-h-[520px] whitespace-pre-wrap selection:bg-amber-200 selection:text-amber-900">
+                            <span class="text-stone-400 italic">Yalın çeviri burada gösterilecektir.</span>
+                        </div>
+                    </div>
+
+                    <!-- Detailed Analysis Result Box -->
+                    <div class="flex flex-col bg-amber-50/40 rounded-2xl border border-amber-300 overflow-hidden min-h-[360px] shadow-lg shadow-amber-900/5">
+                        <div class="bg-amber-100/60 px-4 py-3 border-b border-amber-200 flex items-center justify-between">
+                            <span class="text-xs font-bold text-amber-900 flex items-center space-x-2">
+                                <i class="fa-solid fa-magnifying-glass-chart text-amber-600"></i>
+                                <span>Detaylı Analiz & İnceleme</span>
+                            </span>
+                        </div>
+                        <div id="analysisTextContent" class="p-4 text-xs sm:text-sm text-stone-800 leading-relaxed overflow-y-auto max-h-[520px] whitespace-pre-wrap selection:bg-amber-200 selection:text-amber-900">
+                            <span class="text-stone-400 italic">Kırık mana, irab, özet vb. analizler burada ayrı olarak sunulacaktır.</span>
+                        </div>
+                    </div>
+
+                </div>
+
             </div>
 
         </div>
 
     </main>
 
-    <!-- Floating Word Selection Popup Button -->
-    <div id="selectionTooltip" class="fixed hidden bg-slate-900 border border-indigo-500/60 text-white rounded-xl shadow-2xl p-1 z-50 flex items-center space-x-1 animate-fade-in backdrop-blur-md">
-        <button id="addSelectionToDictBtn" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-2.5 py-1.5 rounded-lg flex items-center space-x-1 font-medium transition-all cursor-pointer">
-            <i class="fa-solid fa-plus text-[10px]"></i>
-            <span>Sözlüğe Ekle</span>
-        </button>
-    </div>
+    <!-- Floating Add to Dictionary Tooltip Popup -->
+    <button id="addToDictPopBtn" class="hidden absolute z-50 bg-amber-700 hover:bg-amber-800 text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-2xl border border-amber-500/40 items-center space-x-1.5 transition-all transform -translate-x-1/2 -translate-y-full">
+        <i class="fa-solid fa-plus text-[10px]"></i>
+        <span>Sözlüğe Ekle</span>
+    </button>
 
-    <!-- Dictionary Modal -->
-    <div id="dictionaryModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-3xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
-            <div class="px-5 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/50">
-                <div class="flex items-center space-x-2.5">
-                    <div class="w-8 h-8 rounded-lg bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center">
-                        <i class="fa-solid fa-book-bookmark text-sm"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-slate-100 text-sm sm:text-base">Kişisel Çeviri Sözlüğüm</h3>
-                        <p class="text-[11px] text-slate-400">Metinlerden kaydettiğiniz kelimeler ve otomatik çevirileri</p>
-                    </div>
-                </div>
+    <!-- Translation History Modal -->
+    <div id="historyModal" class="hidden fixed inset-0 z-50 bg-stone-900/40 backdrop-blur-sm items-center justify-center p-4">
+        <div class="bg-white border border-stone-200 rounded-2xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl flex flex-col max-h-[85vh]">
+            <div class="flex items-center justify-between pb-4 border-b border-stone-200">
                 <div class="flex items-center space-x-2">
-                    <button id="exportDictBtn" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg transition-colors cursor-pointer flex items-center space-x-1">
-                        <i class="fa-solid fa-download text-[10px]"></i>
-                        <span>İndir</span>
-                    </button>
-                    <button id="closeDictModal" class="text-slate-400 hover:text-white p-1 rounded-lg transition-colors cursor-pointer">
-                        <i class="fa-solid fa-xmark text-lg"></i>
-                    </button>
+                    <i class="fa-solid fa-clock-rotate-left text-amber-600 text-lg"></i>
+                    <h3 class="font-bold text-base text-stone-800">Çeviri Geçmişi</h3>
                 </div>
+                <button onclick="closeHistoryModal()" class="text-stone-400 hover:text-stone-700 p-1">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
             </div>
 
-            <div class="p-4 border-b border-slate-800/80 bg-slate-900/50 flex flex-wrap gap-2 items-center justify-between">
-                <div class="relative flex-grow max-w-xs">
-                    <input type="text" id="dictSearchInput" placeholder="Sözlükte ara..." class="w-full bg-slate-950 border border-slate-800 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
-                    <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-xs text-slate-500"></i>
-                </div>
-                <button id="clearDictBtn" class="text-xs text-red-400 hover:text-red-300 transition-colors cursor-pointer py-1">Tüm Sözlüğü Temizle</button>
-            </div>
+            <div id="historyListContainer" class="flex-1 overflow-y-auto my-3 space-y-3 pr-1"></div>
 
-            <div id="dictListContainer" class="p-4 custom-scroll overflow-y-auto flex-grow space-y-2 min-h-[250px]">
-                <!-- Dictionary entries rendered dynamically -->
+            <div class="pt-4 border-t border-stone-200 flex items-center justify-between text-xs">
+                <span class="text-stone-500 font-medium">Toplam <span id="historyCount">0</span> kayıt</span>
+                <button onclick="clearHistory()" class="px-3.5 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 font-semibold transition-colors">
+                    Geçmişi Temizle
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- Notification Toast -->
-    <div id="toast" class="fixed bottom-4 right-4 left-4 sm:left-auto sm:right-6 bg-slate-800 border border-slate-700 text-slate-200 px-4 py-3 rounded-xl shadow-2xl transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center space-x-2.5 text-xs sm:text-sm pointer-events-none">
-        <i class="fa-solid fa-circle-check text-emerald-400 flex-shrink-0 text-base"></i>
-        <span id="toastMessage" class="truncate">İşlem başarılı</span>
+    <!-- Dictionary Modal -->
+    <div id="dictionaryModal" class="hidden fixed inset-0 z-50 bg-stone-900/40 backdrop-blur-sm items-center justify-center p-4">
+        <div class="bg-white border border-stone-200 rounded-2xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl flex flex-col max-h-[85vh]">
+            <div class="flex items-center justify-between pb-4 border-b border-stone-200">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-book-bookmark text-amber-600 text-lg"></i>
+                    <h3 class="font-bold text-base text-stone-800">Kişisel Sözlüğüm</h3>
+                </div>
+                <button onclick="closeDictionaryModal()" class="text-stone-400 hover:text-stone-700 p-1">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="py-3">
+                <input type="text" id="dictSearchInput" oninput="renderDictionaryList()" placeholder="Sözlükte kelime veya anlam ara..." class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3.5 py-2.5 text-xs text-stone-800 placeholder-stone-400 focus:outline-none focus:border-amber-500">
+            </div>
+
+            <div id="dictListContainer" class="flex-1 overflow-y-auto my-2 space-y-2.5 pr-1"></div>
+
+            <div class="pt-4 border-t border-stone-200 flex items-center justify-between text-xs">
+                <button onclick="downloadDictionary()" class="px-3.5 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 border border-stone-300 text-stone-700 font-semibold flex items-center space-x-1.5 transition-colors">
+                    <i class="fa-solid fa-download"></i>
+                    <span>Sözlüğü İndir (.txt)</span>
+                </button>
+                <button onclick="askClearDictionary()" class="px-3.5 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 font-semibold transition-colors">
+                    Tümünü Temizle
+                </button>
+            </div>
+        </div>
     </div>
 
-    <footer class="w-full py-4 text-center text-[11px] sm:text-xs text-slate-500 border-t border-slate-800/40">
-        AI Çok Yönlü Çevirici & Çift Dilli Sözlük
-    </footer>
+    <!-- Confirm Dialog Modal -->
+    <div id="confirmModal" class="hidden fixed inset-0 z-50 bg-stone-900/40 backdrop-blur-sm items-center justify-center p-4">
+        <div class="bg-white border border-stone-200 rounded-2xl max-w-sm w-full p-6 shadow-2xl flex flex-col space-y-4 text-center">
+            <div class="w-12 h-12 rounded-full bg-rose-100 border border-rose-200 text-rose-600 flex items-center justify-center mx-auto">
+                <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+            </div>
+            <div>
+                <h4 class="text-base font-bold text-stone-800 mb-1">Sözlüğü Temizle?</h4>
+                <p class="text-xs text-stone-500">Sözlüğünüzdeki tüm kayıtlı kelimeler kalıcı olarak silinecektir.</p>
+            </div>
+            <div class="flex items-center space-x-2 pt-2">
+                <button onclick="closeConfirmModal()" class="flex-1 py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold border border-stone-200">İptal</button>
+                <button onclick="confirmClearDictionary()" class="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold">Sil</button>
+            </div>
+        </div>
+    </div>
 
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 bg-white border border-stone-300 text-stone-800 px-4 py-3 rounded-xl shadow-2xl text-xs sm:text-sm flex items-center space-x-2 transition-all duration-300 transform translate-y-20 opacity-0 pointer-events-none">
+        <i id="toastIcon" class="fa-solid fa-circle-check text-amber-600"></i>
+        <span id="toastMsg">İşlem tamamlandı.</span>
+    </div>
+
+    <!-- JavaScript Logic Section -->
     <script>
-        let currentMode = 'text'; 
-        let base64Data = null;
-        let pdfFileObj = null;
-        let loadedPdfDoc = null;
+        let currentTab = 'text';
+        let currentFontSize = 14;
+        let dictionary = JSON.parse(localStorage.getItem('ai_app_dictionary') || '[]');
+        let translationHistory = JSON.parse(localStorage.getItem('ai_app_history') || '[]');
+        let pdfDoc = null;
+        let currentPdfPage = 1;
         let totalPdfPages = 0;
+        let selectedImageBase64 = null;
         let isSpeaking = false;
-        let currentFontSize = 14; 
-        let isSplitView = false;
-        let rawOriginalText = "";
-        let rawTranslatedText = "";
-        let detectedLanguageGlobal = "Arapça";
+        let rawSourceText = '';
+        let rawTranslatedText = '';
+        let rawAnalysisText = '';
 
-        let userDictionary = JSON.parse(localStorage.getItem('userDictionary') || '[]');
+        window.onload = function() {
+            updateDictBadge();
+            setupSelectionListener();
+        };
 
-        const tabText = document.getElementById('tabText');
-        const tabImage = document.getElementById('tabImage');
-        const tabPdf = document.getElementById('tabPdf');
-        const textModeContainer = document.getElementById('textModeContainer');
-        const imageModeContainer = document.getElementById('imageModeContainer');
-        const pdfModeContainer = document.getElementById('pdfModeContainer');
-        
-        const textInput = document.getElementById('textInput');
-        const clearTextBtn = document.getElementById('clearTextBtn');
-        const imageInput = document.getElementById('imageInput');
-        const dropzone = document.getElementById('dropzone');
-        const uploadPrompt = document.getElementById('uploadPrompt');
-        const previewContainer = document.getElementById('previewContainer');
-        const imagePreview = document.getElementById('imagePreview');
-        const removeImage = document.getElementById('removeImage');
-
-        const pdfInput = document.getElementById('pdfInput');
-        const pdfUploadPrompt = document.getElementById('pdfUploadPrompt');
-        const pdfPreviewContainer = document.getElementById('pdfPreviewContainer');
-        const pdfFileName = document.getElementById('pdfFileName');
-        const pdfPageCountInfo = document.getElementById('pdfPageCountInfo');
-        const removePdf = document.getElementById('removePdf');
-        const pdfPageControls = document.getElementById('pdfPageControls');
-        const pdfTotalBadge = document.getElementById('pdfTotalBadge');
-        const pdfStartPage = document.getElementById('pdfStartPage');
-        const pdfEndPage = document.getElementById('pdfEndPage');
-        const pdfTotalPagesDisplay = document.getElementById('pdfTotalPagesDisplay');
-        const prevPageBtn = document.getElementById('prevPageBtn');
-        const nextPageBtn = document.getElementById('nextPageBtn');
-        const rangeModeToggle = document.getElementById('rangeModeToggle');
-        const rangeInputGroup = document.getElementById('rangeInputGroup');
-
-        const selectAllFiltersBtn = document.getElementById('selectAllFiltersBtn');
-        const targetLanguageSelect = document.getElementById('targetLanguage');
-        const translateBtn = document.getElementById('translateBtn');
-        const loadingState = document.getElementById('loadingState');
-        const loadingText = document.getElementById('loadingText');
-        const loadingSubtext = document.getElementById('loadingSubtext');
-        const emptyState = document.getElementById('emptyState');
-        const resultContent = document.getElementById('resultContent');
-        const resultFooterNote = document.getElementById('resultFooterNote');
-        const actionButtons = document.getElementById('actionButtons');
-        
-        const originalTextEl = document.getElementById('originalText');
-        const translatedTextEl = document.getElementById('translatedText');
-        const detectedLangText = document.getElementById('detectedLangText');
-        const charCountBadge = document.getElementById('charCountBadge');
-        const wordCountBadge = document.getElementById('wordCountBadge');
-        const resultPageBadge = document.getElementById('resultPageBadge');
-        const originalTextHeaderTitle = document.getElementById('originalTextHeaderTitle');
-        
-        const viewToggleBtn = document.getElementById('viewToggleBtn');
-        const viewToggleIcon = document.getElementById('viewToggleIcon');
-        const viewToggleText = document.getElementById('viewToggleText');
-        const translationBoxesContainer = document.getElementById('translationBoxesContainer');
-        const copyOriginalBtn = document.getElementById('copyOriginalBtn');
-        const copyBtn = document.getElementById('copyBtn');
-        const downloadBtn = document.getElementById('downloadBtn');
-        const speakBtn = document.getElementById('speakBtn');
-        const speakIcon = document.getElementById('speakIcon');
-        const fontDecrease = document.getElementById('fontDecrease');
-        const fontIncrease = document.getElementById('fontIncrease');
-        const toast = document.getElementById('toast');
-        const toastMessage = document.getElementById('toastMessage');
-
-        const selectionTooltip = document.getElementById('selectionTooltip');
-        const addSelectionToDictBtn = document.getElementById('addSelectionToDictBtn');
-        const dictionaryModal = document.getElementById('dictionaryModal');
-        const openDictionaryBtn = document.getElementById('openDictionaryBtn');
-        const closeDictModal = document.getElementById('closeDictModal');
-        const dictCountBadge = document.getElementById('dictCountBadge');
-        const dictListContainer = document.getElementById('dictListContainer');
-        const dictSearchInput = document.getElementById('dictSearchInput');
-        const clearDictBtn = document.getElementById('clearDictBtn');
-        const exportDictBtn = document.getElementById('exportDictBtn');
-
-        let selectedTextStore = "";
-
-        // Select / Deselect All Filters Toggle
-        let allFiltersSelected = false;
-        selectAllFiltersBtn.addEventListener('click', () => {
-            const filterCheckboxes = document.querySelectorAll('input[name="analysisFilter"]');
-            allFiltersSelected = !allFiltersSelected;
-            filterCheckboxes.forEach(cb => cb.checked = allFiltersSelected);
-            selectAllFiltersBtn.textContent = allFiltersSelected ? "Tümünü Kaldır" : "Tümünü Seç";
-        });
-
-        function updateDictBadge() {
-            dictCountBadge.textContent = userDictionary.length;
-        }
-        updateDictBadge();
-
-        function formatParagraphsToHTML(text) {
-            if (!text) return '';
-            const paragraphs = text.split(/\n\s*\n/);
-            return paragraphs
-                .map(p => p.trim())
-                .filter(p => p.length > 0)
-                .map(p => {
-                    const isArabic = /[\u0600-\u06FF]/.test(p);
-                    const classAttr = isArabic ? 'class="font-arabic text-base sm:text-lg"' : '';
-                    return `<p ${classAttr}>${p.replace(/\n/g, '<br>')}</p>`;
-                })
-                .join('');
+        function toggleAllFilters() {
+            const ids = ['filterToplu', 'filterKirik', 'filterHareke', 'filterIrab', 'filterGramer', 'filterOzet'];
+            const firstState = document.getElementById(ids[0]).checked;
+            ids.forEach(id => {
+                document.getElementById(id).checked = !firstState;
+            });
         }
 
-        function switchTab(mode) {
-            currentMode = mode;
-            tabText.className = "py-2.5 px-4 text-center text-xs sm:text-sm font-medium transition-colors flex items-center justify-center space-x-2 whitespace-nowrap cursor-pointer text-slate-400 hover:text-slate-200";
-            tabImage.className = "py-2.5 px-4 text-center text-xs sm:text-sm font-medium transition-colors flex items-center justify-center space-x-2 whitespace-nowrap cursor-pointer text-slate-400 hover:text-slate-200";
-            tabPdf.className = "py-2.5 px-4 text-center text-xs sm:text-sm font-medium transition-colors flex items-center justify-center space-x-2 whitespace-nowrap cursor-pointer text-slate-400 hover:text-slate-200";
-
-            textModeContainer.classList.add('hidden');
-            imageModeContainer.classList.add('hidden');
-            pdfModeContainer.classList.add('hidden');
-
-            if (mode === 'text') {
-                tabText.className = "py-2.5 px-4 text-center text-xs sm:text-sm font-medium transition-colors flex items-center justify-center space-x-2 tab-active whitespace-nowrap cursor-pointer";
-                textModeContainer.classList.remove('hidden');
-            } else if (mode === 'image') {
-                tabImage.className = "py-2.5 px-4 text-center text-xs sm:text-sm font-medium transition-colors flex items-center justify-center space-x-2 tab-active whitespace-nowrap cursor-pointer";
-                imageModeContainer.classList.remove('hidden');
-            } else if (mode === 'pdf') {
-                tabPdf.className = "py-2.5 px-4 text-center text-xs sm:text-sm font-medium transition-colors flex items-center justify-center space-x-2 tab-active whitespace-nowrap cursor-pointer";
-                pdfModeContainer.classList.remove('hidden');
-            }
+        function getSelectedFilterOptions() {
+            const filters = [];
+            if (document.getElementById('filterToplu').checked) filters.push(document.getElementById('filterToplu').value);
+            if (document.getElementById('filterKirik').checked) filters.push(document.getElementById('filterKirik').value);
+            if (document.getElementById('filterHareke').checked) filters.push(document.getElementById('filterHareke').value);
+            if (document.getElementById('filterIrab').checked) filters.push(document.getElementById('filterIrab').value);
+            if (document.getElementById('filterGramer').checked) filters.push(document.getElementById('filterGramer').value);
+            if (document.getElementById('filterOzet').checked) filters.push(document.getElementById('filterOzet').value);
+            return filters;
         }
 
-        tabText.addEventListener('click', () => switchTab('text'));
-        tabImage.addEventListener('click', () => switchTab('image'));
-        tabPdf.addEventListener('click', () => switchTab('pdf'));
+        function switchTab(tab) {
+            currentTab = tab;
+            const tabs = [
+                { id: 'Text', key: 'text' },
+                { id: 'Image', key: 'image' },
+                { id: 'Pdf', key: 'pdf' }
+            ];
+
+            tabs.forEach(t => {
+                const tabBtn = document.getElementById('tab' + t.id);
+                const area = document.getElementById('area' + t.id);
+
+                if (t.key === tab) {
+                    tabBtn.className = 'py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 flex items-center justify-center space-x-2 bg-amber-600 text-white shadow-md shadow-amber-600/20';
+                    area.style.display = 'flex';
+                    area.classList.remove('hidden');
+                } else {
+                    tabBtn.className = 'py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 flex items-center justify-center space-x-2 text-stone-600 hover:text-stone-900 hover:bg-stone-200/60';
+                    area.style.display = 'none';
+                    area.classList.add('hidden');
+                }
+            });
+        }
+
+        function updateCharCount() {
+            const count = document.getElementById('textInput').value.length;
+            document.getElementById('charCount').textContent = count + ' karakter';
+        }
+
+        function adjustFontSize(delta) {
+            currentFontSize = Math.max(11, Math.min(22, currentFontSize + delta));
+            document.getElementById('translatedTextContent').style.fontSize = currentFontSize + 'px';
+            document.getElementById('analysisTextContent').style.fontSize = currentFontSize + 'px';
+        }
 
         function showToast(msg, isError = false) {
-            toastMessage.textContent = msg;
-            toast.classList.remove('translate-y-20', 'opacity-0');
-            if (isError) {
-                toast.classList.add('border-red-500/50', 'bg-red-950/90');
-            } else {
-                toast.classList.remove('border-red-500/50', 'bg-red-950/90');
-            }
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMsg');
+            const toastIcon = document.getElementById('toastIcon');
+
+            toastMsg.textContent = msg;
+            toastIcon.className = isError ? 'fa-solid fa-circle-exclamation text-rose-500' : 'fa-solid fa-circle-check text-amber-600';
+            
+            toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
             setTimeout(() => {
-                toast.classList.add('translate-y-20', 'opacity-0');
+                toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
             }, 3000);
         }
 
-        imageInput.addEventListener('change', (e) => {
+        function handleImageSelected(e) {
             const file = e.target.files[0];
-            if (file) handleImageFile(file);
-        });
-
-        function handleImageFile(file) {
+            if (!file) return;
+            
             const reader = new FileReader();
-            reader.onload = (e) => {
-                base64Data = e.target.result.split(',')[1];
-                imagePreview.src = e.target.result;
-                uploadPrompt.classList.add('hidden');
-                previewContainer.classList.remove('hidden');
-                showToast('Görsel başarıyla yüklendi!');
+            reader.onload = (event) => {
+                selectedImageBase64 = event.target.result;
+                document.getElementById('imagePreview').src = selectedImageBase64;
+                document.getElementById('imagePreviewContainer').classList.remove('hidden');
+                document.getElementById('imageDropZone').classList.add('hidden');
             };
             reader.readAsDataURL(file);
         }
 
-        removeImage.addEventListener('click', (e) => {
-            e.stopPropagation();
-            base64Data = null;
-            imageInput.value = '';
-            imagePreview.src = '';
-            previewContainer.classList.add('hidden');
-            uploadPrompt.classList.remove('hidden');
-            showToast('Görsel kaldırıldı.');
-        });
+        function clearSelectedImage() {
+            selectedImageBase64 = null;
+            document.getElementById('imageFileInput').value = '';
+            document.getElementById('imagePreviewContainer').classList.add('hidden');
+            document.getElementById('imageDropZone').classList.remove('hidden');
+        }
 
-        pdfInput.addEventListener('change', async (e) => {
+        async function handlePdfSelected(e) {
             const file = e.target.files[0];
-            if (file) {
-                pdfFileObj = file;
-                pdfFileName.textContent = file.name;
-                pdfUploadPrompt.classList.add('hidden');
-                pdfPreviewContainer.classList.remove('hidden');
-                
-                showToast('PDF taranıyor...');
-                try {
-                    const arrayBuffer = await file.arrayBuffer();
-                    loadedPdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-                    totalPdfPages = loadedPdfDoc.numPages;
-                    
-                    pdfPageCountInfo.textContent = `Toplam ${totalPdfPages} Sayfa Algılandı`;
-                    pdfTotalBadge.textContent = `${totalPdfPages} Sayfa`;
-                    pdfTotalPagesDisplay.textContent = totalPdfPages;
-                    pdfStartPage.max = totalPdfPages;
-                    pdfEndPage.max = totalPdfPages;
-                    pdfStartPage.value = 1;
-                    pdfEndPage.value = Math.min(3, totalPdfPages);
-                    
-                    pdfPageControls.classList.remove('hidden');
-                    showToast('PDF başarıyla yüklendi!');
-                } catch (err) {
-                    showToast('PDF okunamadı. Dosya bozuk olabilir.', true);
-                }
-            }
-        });
+            if (!file) return;
 
-        removePdf.addEventListener('click', () => {
-            pdfFileObj = null;
-            loadedPdfDoc = null;
-            totalPdfPages = 0;
-            pdfInput.value = '';
-            pdfPreviewContainer.classList.add('hidden');
-            pdfUploadPrompt.classList.remove('hidden');
-            pdfPageControls.classList.add('hidden');
-            showToast('PDF kaldırıldı.');
-        });
-
-        prevPageBtn.addEventListener('click', () => {
-            let val = parseInt(pdfStartPage.value) || 1;
-            if (val > 1) pdfStartPage.value = val - 1;
-        });
-
-        nextPageBtn.addEventListener('click', () => {
-            let val = parseInt(pdfStartPage.value) || 1;
-            if (val < totalPdfPages) pdfStartPage.value = val + 1;
-        });
-
-        rangeModeToggle.addEventListener('change', (e) => {
-            if (e.target.checked) {
-                rangeInputGroup.classList.remove('hidden');
-            } else {
-                rangeInputGroup.classList.add('hidden');
-            }
-        });
-
-        clearTextBtn.addEventListener('click', () => {
-            textInput.value = '';
-            showToast('Metin temizlendi.');
-        });
-
-        translateBtn.addEventListener('click', async () => {
-            let promptContent = "";
-            let payloadParts = [];
-
-            const targetLang = targetLanguageSelect.value;
-            
-            // Gather selected filter checkboxes
-            const selectedFilters = Array.from(document.querySelectorAll('input[name="analysisFilter"]:checked')).map(cb => cb.value);
-
-            if (selectedFilters.length === 0) {
-                showToast('Lütfen en az bir analiz filtresi/seçeneği işaretleyin!', true);
-                return;
-            }
-
-            if (currentMode === 'text') {
-                promptContent = textInput.value.trim();
-                if (!promptContent) {
-                    showToast('Lütfen çevrilecek bir metin girin.', true);
-                    return;
-                }
-                payloadParts.push({ text: promptContent });
-            } else if (currentMode === 'image') {
-                if (!base64Data) {
-                    showToast('Lütfen bir resim yükleyin.', true);
-                    return;
-                }
-                payloadParts.push({
-                    inlineData: {
-                        mimeType: "image/jpeg",
-                        data: base64Data
-                    }
-                });
-                payloadParts.push({ text: "Bu görseldeki tüm metinlerin tamamını yukarıdan aşağıya eksiksiz oku, OCR yap ve seçilen analiz filtrelerini uygula." });
-            } else if (currentMode === 'pdf') {
-                if (!loadedPdfDoc) {
-                    showToast('Lütfen bir PDF dosyası yükleyin.', true);
-                    return;
-                }
-                loadingState.classList.remove('hidden');
-                emptyState.classList.add('hidden');
-                resultContent.classList.add('hidden');
-                loadingText.textContent = "PDF Sayfaları İşleniyor...";
-
-                const isRange = rangeModeToggle.checked;
-                let start = parseInt(pdfStartPage.value) || 1;
-                let end = isRange ? (parseInt(pdfEndPage.value) || start) : start;
-
-                if (start > totalPdfPages) start = totalPdfPages;
-                if (end > totalPdfPages) end = totalPdfPages;
-                if (start > end) end = start;
-
-                resultPageBadge.textContent = isRange ? `Sayfa ${start}-${end}` : `Sayfa ${start}`;
-
-                payloadParts.push({ text: `Lütfen bu PDF belgesinin seçilen sayfalarının (Sayfa ${start} - ${end}) BAŞINDAN SONUNA KADAR TÜM METİNLERİNİ eksiksiz oku ve seçilen filtreleri tam olarak uygula.` });
-
-                for (let i = start; i <= end; i++) {
-                    const page = await loadedPdfDoc.getPage(i);
-                    const textContent = await page.getTextContent();
-                    let pageStr = textContent.items.map(item => item.str).join(' ');
-
-                    const viewport = page.getViewport({ scale: 2.5 });
-                    const canvas = document.createElement('canvas');
-                    const context = canvas.getContext('2d');
-                    canvas.height = viewport.height;
-                    canvas.width = viewport.width;
-                    
-                    await page.render({ canvasContext: context, viewport: viewport }).promise;
-                    const imgDataUrl = canvas.toDataURL('image/jpeg', 0.95);
-                    const pageBase64 = imgDataUrl.split(',')[1];
-
-                    payloadParts.push({ text: `--- SAYFA ${i} BAŞLANGICI ---` });
-                    payloadParts.push({
-                        inlineData: {
-                            mimeType: 'image/jpeg',
-                            data: pageBase64
-                        }
-                    });
-                    if (pageStr.trim().length > 0) {
-                        payloadParts.push({ text: `[Sayfa ${i} Metin Katmanı Tam Kopyası]: ${pageStr}` });
-                    }
-                    payloadParts.push({ text: `--- SAYFA ${i} BİTİŞİ ---` });
-                }
-            }
-
-            loadingState.classList.remove('hidden');
-            emptyState.classList.add('hidden');
-            resultContent.classList.add('hidden');
-            actionButtons.classList.add('hidden');
-            loadingText.textContent = "Seçilen Filtreler İşleniyor...";
-            loadingSubtext.textContent = `Seçilen filtreler: ${selectedFilters.length} adet mod aktif`;
-
-            // Build dynamic custom prompt based on selected filter checkboxes
-            let filterInstructions = [];
-            if (selectedFilters.includes('full_mana')) {
-                filterInstructions.push(`■ TOPLU MANA: Metnin edebi, akıcı, anlaşılır ve bağlamı koruyan toplu çevirisini sun.`);
-            }
-            if (selectedFilters.includes('broken_mana')) {
-                filterInstructions.push(`■ KIRIK MANA (Kelime Kelime): Metni kelime kelime veya kısa tamlamalar halinde ayırıp, her bir kelimenin altına veya parantez içinde doğrudan hedef dildeki kırık mana karşılığını yaz.`);
-            }
-            if (selectedFilters.includes('irab')) {
-                filterInstructions.push(`■ İRAB ANALİZİ: Cümlelerdeki ögelerin (Mübteda, Haber, Fiil, Fail, Mef'ul, Harf-i Cer vb.) gramer konumlarını ve kelime köklerini detaylı tahlil et.`);
-            }
-            if (selectedFilters.includes('harakat')) {
-                filterInstructions.push(`■ HAREKELEME: Orijinal Arapça metni dil bilgisi kurallarına uygun olarak eksiksiz bir şekilde (son harf harekeleri dahil) tam harekele.`);
-            }
-            if (selectedFilters.includes('grammar_analysis')) {
-                filterInstructions.push(`■ DERİN CÜMLE & GRAMER İNCELEMESİ: Cümle yapılarını, zaman kullanımını, edatları ve gramer özelliklerini incele.`);
-            }
-            if (selectedFilters.includes('summary')) {
-                filterInstructions.push(`■ METİN ÖZETİ: Metnin ana fikirlerini kısa maddeler halinde özetle.`);
-            }
-
-            const systemPrompt = `Sen akademik seviyede bir dil bilimci, Arapça mütercim ve dil uzmanısın.
-Görevin, verilen metin veya görsel/PDF içeriğini inceleyip, kullanıcının SEÇTİĞİ TÜM FİLTRELERİ BİR ARADA eksiksiz olarak Hedef Dil ("${targetLang}") kurallarına göre sunmaktır.
-
-KULLANICININ SEÇTİĞİ FİLTRELER VE TALİMATLAR:
-${filterInstructions.join('\n\n')}
-
-ÇIKTI DÜZENİ VE KURALLAR:
-1. Yanıtta seçilen her filtreyi belirgin başlıklar altında düzenli ve açık bir formatta sırala.
-2. Metnin hiçbir kısmını atlama, eksiksiz işle.
-3. Çıktıyı MUTLAKA aşağıdaki JSON formatında ver:
-{
-  "detectedLanguage": "Kaynak dil tespiti (Örn: Arapça, İngilizce vb.)",
-  "originalText": "Kaynak metin (Tam ve eksiksiz metin kopyası)",
-  "translatedText": "Seçilen tüm filtre başlıklarını barındıran tam analiz çıktısı"
-}`;
-
-            const payload = {
-                contents: [{ role: 'user', parts: payloadParts }],
-                systemInstruction: { parts: [{ text: systemPrompt }] },
-                generationConfig: {
-                    responseMimeType: "application/json",
-                    responseSchema: {
-                        type: "OBJECT",
-                        properties: {
-                            detectedLanguage: { type: "STRING" },
-                            originalText: { type: "STRING" },
-                            translatedText: { type: "STRING" }
-                        },
-                        propertyOrdering: ["detectedLanguage", "originalText", "translatedText"]
-                    }
-                }
-            };
-
+            document.getElementById('pdfFileName').textContent = file.name;
             try {
-                await executeGeminiRequest(payload);
+                const arrayBuffer = await file.arrayBuffer();
+                pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                totalPdfPages = pdfDoc.numPages;
+                currentPdfPage = 1;
+
+                document.getElementById('pdfTotalPages').textContent = totalPdfPages;
+                document.getElementById('pdfCurrentPageNum').textContent = currentPdfPage;
+                document.getElementById('pdfPageInput').value = 1;
+                document.getElementById('pdfPageInput').max = totalPdfPages;
+                document.getElementById('pdfControls').classList.remove('hidden');
+                document.getElementById('pdfControls').classList.add('flex');
+                showToast(`PDF yüklendi: Toplam ${totalPdfPages} sayfa.`);
             } catch (err) {
-                loadingState.classList.add('hidden');
-                emptyState.classList.remove('hidden');
-                showToast('Çeviri sırasında bir hata oluştu: ' + err.message, true);
-            }
-        });
-
-        async function executeGeminiRequest(payload) {
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent`;
-
-            let response = null;
-            let retries = 3;
-            let delay = 1000;
-
-            for (let i = 0; i < retries; i++) {
-                try {
-                    response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                    if (response.ok) break;
-                } catch (err) {
-                    if (i === retries - 1) throw err;
-                }
-                await new Promise(res => setTimeout(res, delay));
-                delay *= 2;
-            }
-
-            if (!response || !response.ok) {
-                throw new Error('API bağlantısı kurulamadı.');
-            }
-
-            const result = await response.json();
-            const candidate = result.candidates?.[0];
-
-            if (candidate && candidate.content?.parts?.[0]?.text) {
-                const jsonStr = candidate.content.parts[0].text;
-                const parsed = JSON.parse(jsonStr);
-
-                detectedLanguageGlobal = parsed.detectedLanguage || 'Kaynak Dil';
-                detectedLangText.textContent = `Algılanan Dil: ${detectedLanguageGlobal}`;
-                originalTextHeaderTitle.innerHTML = `<i class="fa-solid fa-align-left text-slate-500 text-[10px]"></i> Orijinal Metin (${detectedLanguageGlobal})`;
-
-                rawOriginalText = parsed.originalText || "Orijinal metin bulunamadı.";
-                rawTranslatedText = parsed.translatedText || "Çeviri yapılamadı.";
-
-                originalTextEl.innerHTML = formatParagraphsToHTML(rawOriginalText);
-                translatedTextEl.innerHTML = formatParagraphsToHTML(rawTranslatedText);
-
-                const chars = rawTranslatedText.length;
-                const words = rawTranslatedText.trim().split(/\s+/).filter(w => w.length > 0).length;
-
-                charCountBadge.innerHTML = `<i class="fa-regular fa-file-lines text-slate-500 mr-1"></i>${chars.toLocaleString()} karakter`;
-                wordCountBadge.innerHTML = `<i class="fa-solid fa-font text-indigo-400 mr-1"></i>${words.toLocaleString()} kelime`;
-
-                loadingState.classList.add('hidden');
-                resultContent.classList.remove('hidden');
-                resultFooterNote.classList.remove('hidden');
-                actionButtons.classList.remove('hidden');
-                showToast('Çeviri ve filtre analizi tamamlandı!');
-            } else {
-                throw new Error('Yapay zekadan geçerli yanıt alınamadı.');
+                showToast('PDF yükleme hatası: ' + err.message, true);
             }
         }
 
-        function handleTextSelection(e) {
-            const selection = window.getSelection();
-            const text = selection.toString().trim();
-
-            if (text.length > 0 && text.length < 100) {
-                selectedTextStore = text;
-                const range = selection.getRangeAt(0);
-                const rect = range.getBoundingClientRect();
-
-                selectionTooltip.style.top = `${window.scrollY + rect.top - 45}px`;
-                selectionTooltip.style.left = `${window.scrollX + rect.left + (rect.width / 2) - 50}px`;
-                selectionTooltip.classList.remove('hidden');
-            } else {
-                selectionTooltip.classList.add('hidden');
+        function changePdfPage(delta) {
+            if (!pdfDoc) return;
+            const newPage = currentPdfPage + delta;
+            if (newPage >= 1 && newPage <= totalPdfPages) {
+                currentPdfPage = newPage;
+                document.getElementById('pdfCurrentPageNum').textContent = currentPdfPage;
+                document.getElementById('pdfPageInput').value = currentPdfPage;
             }
         }
 
-        document.addEventListener('mouseup', (e) => {
-            if (!selectionTooltip.contains(e.target)) {
-                setTimeout(handleTextSelection, 10);
+        function jumpToPdfPage() {
+            if (!pdfDoc) return;
+            const val = parseInt(document.getElementById('pdfPageInput').value);
+            if (val >= 1 && val <= totalPdfPages) {
+                currentPdfPage = val;
+                document.getElementById('pdfCurrentPageNum').textContent = currentPdfPage;
             }
-        });
+        }
 
-        addSelectionToDictBtn.addEventListener('click', async () => {
-            if (!selectedTextStore) return;
+        async function extractPdfPageData(pageNum) {
+            const page = await pdfDoc.getPage(pageNum);
+            const viewport = page.getViewport({ scale: 2.5 });
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
 
-            const selectedWord = selectedTextStore;
-            selectionTooltip.classList.add('hidden');
-            showToast(`"${selectedWord}" kelimesi sözlüğe ekleniyor...`);
+            await page.render({ canvasContext: context, viewport: viewport }).promise;
+            const base64Img = canvas.toDataURL('image/png');
+            return { type: 'image', content: base64Img };
+        }
 
-            const isArabicSelected = /[\u0600-\u06FF]/.test(selectedWord);
-            const sourceLang = isArabicSelected ? "Arapça" : detectedLanguageGlobal;
-            const targetLang = targetLanguageSelect.value;
+        async function runTranslationProcess() {
+            const targetLang = document.getElementById('targetLanguage').value;
+            const systemRole = document.getElementById('systemRole').value;
+            const activeFilters = getSelectedFilterOptions();
 
-            const systemPrompt = `Sen profesyonel bir çok dilli sözlük asistanısın. 
-Kullanıcının seçtiği kelimeyi incele ve JSON formatında çeviri ver.
-Seçilen Kelime: "${selectedWord}".
-Kaynak Dil: "${sourceLang}", Hedef Dil: "${targetLang}".
-
-Çıktı Formatı (JSON):
-{
-  "word": "${selectedWord}",
-  "sourceLang": "${sourceLang}",
-  "targetLang": "${targetLang}",
-  "translation": "Kelimenin Türkçe/Hedef Dildeki Karşılığı",
-  "root": "Kelime kökü (Arapça ise örn: c-l-s / جلس)",
-  "definition": "Kısa açıklama veya anlam detayı"
-}`;
-
-            const payload = {
-                contents: [{ role: 'user', parts: [{ text: `Kelimemi sözlüğe ekle: ${selectedWord}` }] }],
-                systemInstruction: { parts: [{ text: systemPrompt }] },
-                generationConfig: {
-                    responseMimeType: "application/json",
-                    responseSchema: {
-                        type: "OBJECT",
-                        properties: {
-                            word: { type: "STRING" },
-                            sourceLang: { type: "STRING" },
-                            targetLang: { type: "STRING" },
-                            translation: { type: "STRING" },
-                            root: { type: "STRING" },
-                            definition: { type: "STRING" }
-                        },
-                        propertyOrdering: ["word", "sourceLang", "targetLang", "translation", "root", "definition"]
-                    }
-                }
-            };
-
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent`;
+            document.getElementById('loadingIndicator').classList.remove('hidden');
+            document.getElementById('loadingIndicator').classList.add('flex');
+            document.getElementById('outputContainer').classList.add('hidden');
 
             try {
+                let userPromptText = "";
+                let imagePart = null;
+
+                if (currentTab === 'text') {
+                    const text = document.getElementById('textInput').value.trim();
+                    if (!text) {
+                        showToast('Lütfen çevrilecek bir metin girin.', true);
+                        hideLoading();
+                        return;
+                    }
+                    rawSourceText = text;
+                    userPromptText = text;
+                } else if (currentTab === 'image') {
+                    if (!selectedImageBase64) {
+                        showToast('Lütfen önce bir resim seçin.', true);
+                        hideLoading();
+                        return;
+                    }
+                    rawSourceText = "[Görsel İşleniyor]";
+                    const base64Data = selectedImageBase64.split(',')[1];
+                    imagePart = { inlineData: { mimeType: "image/png", data: base64Data } };
+                    userPromptText = "Bu görseldeki metni tespit edip çevir ve analiz et.";
+                } else if (currentTab === 'pdf') {
+                    if (!pdfDoc) {
+                        showToast('Lütfen önce bir PDF dosyası yükleyin.', true);
+                        hideLoading();
+                        return;
+                    }
+                    rawSourceText = `[PDF Sayfa ${currentPdfPage} İşleniyor]`;
+                    const pageData = await extractPdfPageData(currentPdfPage);
+                    const base64Data = pageData.content.split(',')[1];
+                    imagePart = { inlineData: { mimeType: "image/png", data: base64Data } };
+                    userPromptText = `PDF Sayfa ${currentPdfPage} üzerindeki tüm metni oku, çevir ve analiz et.`;
+                }
+
+                const filterRequirements = activeFilters.length > 0 
+                    ? `İstenen Ek Analizler:\n` + activeFilters.map(f => `- ${f}`).join('\n')
+                    : `Ek analiz talep edilmedi.`;
+
+                const systemPrompt = `Sen profesyonel bir çevirmen ve dil analistisin. 
+Çıktını KESİNLİKLE aşağıdaki geçerli JSON formatında ver:
+
+{
+  "translation": "Metnin sadece doğrudan, duru ve yalın çevirisi.",
+  "analysis": "Seçilen analiz başlıklarının (Kırık Mana, İrab, Özet vb.) düzenli ve açıklayıcı metni."
+}
+
+Hedef Dil: ${targetLang}
+Üslup: ${systemRole}
+${filterRequirements}`;
+
+                const contentsParts = [{ text: userPromptText }];
+                if (imagePart) contentsParts.push(imagePart);
+
+                const payload = {
+                    contents: [{ parts: contentsParts }],
+                    systemInstruction: { parts: [{ text: systemPrompt }] },
+                    generationConfig: { responseMimeType: "application/json" }
+                };
+
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent`;
+
                 const response = await fetch(apiUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
 
-                if (response.ok) {
-                    const resJson = await response.json();
-                    const jsonText = resJson.candidates?.[0]?.content?.parts?.[0]?.text;
-                    if (jsonText) {
-                        const entry = JSON.parse(jsonText);
-                        userDictionary.unshift(entry);
-                        localStorage.setItem('userDictionary', JSON.stringify(userDictionary));
-                        updateDictBadge();
-                        showToast(`"${selectedWord}" sözlüğe başarıyla eklendi!`);
-                        return;
-                    }
+                const data = await response.json();
+                if (data.error) {
+                    throw new Error(data.error.message || 'Servis yanıt vermedi.');
                 }
 
-                const fallbackEntry = {
-                    word: selectedWord,
-                    sourceLang: sourceLang,
-                    targetLang: targetLang,
-                    translation: "Açıklama yüklenemedi",
-                    root: "",
-                    definition: "Manuel eklendi"
-                };
-                userDictionary.unshift(fallbackEntry);
-                localStorage.setItem('userDictionary', JSON.stringify(userDictionary));
-                updateDictBadge();
-                showToast(`"${selectedWord}" sözlüğe eklendi!`);
+                const resultText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+                if (resultText) {
+                    try {
+                        const parsed = JSON.parse(resultText);
+                        rawTranslatedText = parsed.translation || "Çeviri elde edilemedi.";
+                        rawAnalysisText = parsed.analysis || "Analiz bilgisi sunulmadı.";
+                    } catch (e) {
+                        rawTranslatedText = resultText;
+                        rawAnalysisText = "Detaylı analiz ayrıştırılamadı.";
+                    }
+
+                    renderResults(rawTranslatedText, rawAnalysisText);
+                    saveTranslationToHistory(rawSourceText, rawTranslatedText, targetLang);
+                } else {
+                    showToast('Çeviri sonucu alınamadı.', true);
+                }
+
             } catch (err) {
-                const fallbackEntry = {
-                    word: selectedWord,
-                    sourceLang: sourceLang,
-                    targetLang: targetLang,
-                    translation: "Bağlantı hatası",
-                    root: "",
-                    definition: "Manuel kaydoldu"
-                };
-                userDictionary.unshift(fallbackEntry);
-                localStorage.setItem('userDictionary', JSON.stringify(userDictionary));
-                updateDictBadge();
-                showToast(`"${selectedWord}" sözlüğe kaydedildi!`);
+                showToast('Çeviri hatası: ' + err.message, true);
+            } finally {
+                hideLoading();
             }
-        });
-
-        function renderDictionary(filter = '') {
-            dictListContainer.innerHTML = '';
-
-            const filtered = userDictionary.filter(item => 
-                item.word.toLowerCase().includes(filter.toLowerCase()) ||
-                item.translation.toLowerCase().includes(filter.toLowerCase())
-            );
-
-            if (filtered.length === 0) {
-                dictListContainer.innerHTML = `
-                    <div class="text-center py-12 text-slate-500">
-                        <i class="fa-solid fa-book-open text-2xl mb-2 text-slate-600"></i>
-                        <p class="text-xs">Sözlükte henüz bir kelime bulunmuyor.</p>
-                    </div>
-                `;
-                return;
-            }
-
-            filtered.forEach((item, index) => {
-                const isAr = /[\u0600-\u06FF]/.test(item.word);
-                const el = document.createElement('div');
-                el.className = "bg-slate-950/80 border border-slate-800 rounded-xl p-3 flex items-start justify-between gap-3 hover:border-indigo-500/50 transition-all";
-                el.innerHTML = `
-                    <div class="space-y-1">
-                        <div class="flex items-center space-x-2">
-                            <span class="${isAr ? 'font-arabic text-lg' : 'font-bold text-sm'} text-indigo-300">${item.word}</span>
-                            <span class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full border border-slate-700">${item.sourceLang} ➔ ${item.targetLang}</span>
-                            ${item.root ? `<span class="text-[10px] bg-emerald-950 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-800">Kök: ${item.root}</span>` : ''}
-                        </div>
-                        <p class="text-xs font-semibold text-slate-100">${item.translation}</p>
-                        ${item.definition ? `<p class="text-[11px] text-slate-400">${item.definition}</p>` : ''}
-                    </div>
-                    <button onclick="deleteDictItem(${index})" class="text-slate-500 hover:text-red-400 p-1.5 transition-colors cursor-pointer">
-                        <i class="fa-solid fa-trash-can text-xs"></i>
-                    </button>
-                `;
-                dictListContainer.appendChild(el);
-            });
         }
 
-        window.deleteDictItem = function(index) {
-            userDictionary.splice(index, 1);
-            localStorage.setItem('userDictionary', JSON.stringify(userDictionary));
-            updateDictBadge();
-            renderDictionary(dictSearchInput.value);
-            showToast('Kelime sözlükten silindi.');
-        };
+        function hideLoading() {
+            document.getElementById('loadingIndicator').classList.add('hidden');
+            document.getElementById('loadingIndicator').classList.remove('flex');
+            document.getElementById('outputContainer').classList.remove('hidden');
+        }
 
-        openDictionaryBtn.addEventListener('click', () => {
-            renderDictionary();
-            dictionaryModal.classList.remove('hidden');
-        });
+        function renderResults(trans, analysis) {
+            const transContainer = document.getElementById('translatedTextContent');
+            const analysisContainer = document.getElementById('analysisTextContent');
 
-        closeDictModal.addEventListener('click', () => {
-            dictionaryModal.classList.add('hidden');
-        });
-
-        dictSearchInput.addEventListener('input', (e) => {
-            renderDictionary(e.target.value);
-        });
-
-        clearDictBtn.addEventListener('click', () => {
-            if (confirm('Tüm sözlüğü temizlemek istediğinize emin misiniz?')) {
-                userDictionary = [];
-                localStorage.removeItem('userDictionary');
-                updateDictBadge();
-                renderDictionary();
-                showToast('Sözlük temizlendi.');
+            if (/[\u0600-\u06FF]/.test(trans)) {
+                transContainer.className = "p-4 text-xs sm:text-sm text-stone-900 leading-relaxed overflow-y-auto max-h-[520px] whitespace-pre-wrap selection:bg-amber-200 arabic-text";
+            } else {
+                transContainer.className = "p-4 text-xs sm:text-sm text-stone-900 leading-relaxed overflow-y-auto max-h-[520px] whitespace-pre-wrap selection:bg-amber-200";
             }
-        });
 
-        exportDictBtn.addEventListener('click', () => {
-            if (userDictionary.length === 0) {
-                showToast('İndirilecek kelime yok.', true);
+            if (/[\u0600-\u06FF]/.test(analysis)) {
+                analysisContainer.className = "p-4 text-xs sm:text-sm text-stone-900 leading-relaxed overflow-y-auto max-h-[520px] whitespace-pre-wrap selection:bg-amber-200 arabic-text";
+            } else {
+                analysisContainer.className = "p-4 text-xs sm:text-sm text-stone-900 leading-relaxed overflow-y-auto max-h-[520px] whitespace-pre-wrap selection:bg-amber-200";
+            }
+
+            transContainer.textContent = trans;
+            analysisContainer.textContent = analysis;
+        }
+
+        function speakTranslation() {
+            if (!rawTranslatedText) {
+                showToast('Okunacak metin bulunamadı.', true);
                 return;
             }
-            let txtContent = "--- KİŞİSEL ÇEVİRİ VE ARAPÇA SÖZLÜĞÜM ---\n\n";
-            userDictionary.forEach((item, i) => {
-                txtContent += `${i+1}. ${item.word} [${item.sourceLang} ➔ ${item.targetLang}]\n   Anlamı: ${item.translation}\n   ${item.root ? 'Kök: ' + item.root + '\n' : ''}   Açıklama: ${item.definition || '-'}\n\n`;
-            });
-
-            const blob = new Blob([txtContent], { type: 'text/plain;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `sozligim_${new Date().toISOString().slice(0,10)}.txt`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            showToast('Sözlük dosyası indirildi (.txt)!');
-        });
-
-        viewToggleBtn.addEventListener('click', () => {
-            isSplitView = !isSplitView;
-            if (isSplitView) {
-                translationBoxesContainer.classList.remove('grid-cols-1');
-                translationBoxesContainer.classList.add('grid-cols-2');
-                viewToggleIcon.className = "fa-solid fa-bars";
-                viewToggleText.textContent = "Alt Alta";
-                showToast('Yan yana görünüm aktif!');
-            } else {
-                translationBoxesContainer.classList.remove('grid-cols-2');
-                translationBoxesContainer.classList.add('grid-cols-1');
-                viewToggleIcon.className = "fa-solid fa-columns";
-                viewToggleText.textContent = "Yan Yana";
-                showToast('Alt alta görünüm aktif!');
-            }
-        });
-
-        fontIncrease.addEventListener('click', () => {
-            if (currentFontSize < 22) {
-                currentFontSize += 2;
-                originalTextEl.style.fontSize = currentFontSize + 'px';
-                translatedTextEl.style.fontSize = currentFontSize + 'px';
-                showToast(`Yazı boyutu: ${currentFontSize}px`);
-            }
-        });
-
-        fontDecrease.addEventListener('click', () => {
-            if (currentFontSize > 11) {
-                currentFontSize -= 2;
-                originalTextEl.style.fontSize = currentFontSize + 'px';
-                translatedTextEl.style.fontSize = currentFontSize + 'px';
-                showToast(`Yazı boyutu: ${currentFontSize}px`);
-            }
-        });
-
-        speakBtn.addEventListener('click', () => {
-            const textToSpeak = rawTranslatedText || translatedTextEl.textContent;
-            if (!textToSpeak) return;
 
             if ('speechSynthesis' in window) {
                 if (isSpeaking) {
                     window.speechSynthesis.cancel();
                     isSpeaking = false;
-                    speakIcon.className = "fa-solid fa-volume-high";
-                    showToast('Sesli okuma durduruldu.');
+                    document.getElementById('ttsIcon').className = 'fa-solid fa-volume-high text-amber-600';
+                    document.getElementById('ttsText').textContent = 'Sesli Oku';
                     return;
                 }
 
-                const utterance = new SpeechSynthesisUtterance(textToSpeak);
-                const targetLang = targetLanguageSelect.value;
-                if (targetLang === 'Turkish') utterance.lang = 'tr-TR';
-                else if (targetLang === 'Arabic') utterance.lang = 'ar-SA';
-                else if (targetLang === 'English') utterance.lang = 'en-US';
-                else if (targetLang === 'German') utterance.lang = 'de-DE';
-                else utterance.lang = 'tr-TR';
+                const utterance = new SpeechSynthesisUtterance(rawTranslatedText);
+                const targetLang = document.getElementById('targetLanguage').value;
+                const langMap = {
+                    'Turkish': 'tr-TR', 'Arabic': 'ar-SA', 'English': 'en-US',
+                    'German': 'de-DE', 'French': 'fr-FR', 'Spanish': 'es-ES',
+                    'Russian': 'ru-RU', 'Japanese': 'ja-JP', 'Italian': 'it-IT',
+                    'Chinese': 'zh-CN', 'Korean': 'ko-KR', 'Persian': 'fa-IR',
+                    'Uzbek': 'uz-UZ', 'Kazakh': 'kk-KZ', 'Kyrgyz': 'ky-KG'
+                };
 
+                utterance.lang = langMap[targetLang] || 'tr-TR';
                 utterance.onstart = () => {
                     isSpeaking = true;
-                    speakIcon.className = "fa-solid fa-volume-xmark animate-pulse text-indigo-400";
-                    showToast('Sesli okuma başlatıldı...');
+                    document.getElementById('ttsIcon').className = 'fa-solid fa-square-stop text-rose-500';
+                    document.getElementById('ttsText').textContent = 'Durdur';
                 };
-
                 utterance.onend = () => {
                     isSpeaking = false;
-                    speakIcon.className = "fa-solid fa-volume-high";
-                };
-
-                utterance.onerror = () => {
-                    isSpeaking = false;
-                    speakIcon.className = "fa-solid fa-volume-high";
-                    showToast('Sesli okuma hatası.', true);
+                    document.getElementById('ttsIcon').className = 'fa-solid fa-volume-high text-amber-600';
+                    document.getElementById('ttsText').textContent = 'Sesli Oku';
                 };
 
                 window.speechSynthesis.speak(utterance);
             } else {
                 showToast('Tarayıcınız sesli okumayı desteklemiyor.', true);
             }
-        });
-
-        function copyToClipboard(text, successMsg) {
-            if (!text) return;
-            const textarea = document.createElement('textarea');
-            textarea.value = text;
-            document.body.appendChild(textarea);
-            textarea.select();
-            try {
-                document.execCommand('copy');
-                showToast(successMsg);
-            } catch (err) {
-                showToast('Kopyalama başarısız oldu.', true);
-            }
-            document.body.removeChild(textarea);
         }
 
-        copyOriginalBtn.addEventListener('click', () => {
-            copyToClipboard(rawOriginalText || originalTextEl.textContent, 'Orijinal metin kopyalandı!');
-        });
+        function saveTranslationToHistory(src, trans, lang) {
+            const historyItem = {
+                id: Date.now(),
+                date: new Date().toLocaleString('tr-TR'),
+                source: src,
+                translated: trans,
+                lang: lang
+            };
+            translationHistory.unshift(historyItem);
+            if (translationHistory.length > 30) translationHistory.pop();
+            localStorage.setItem('ai_app_history', JSON.stringify(translationHistory));
+        }
 
-        copyBtn.addEventListener('click', () => {
-            copyToClipboard(rawTranslatedText || translatedTextEl.textContent, 'Çeviri panoya kopyalandı!');
-        });
+        function openHistoryModal() {
+            renderHistoryList();
+            const modal = document.getElementById('historyModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
 
-        downloadBtn.addEventListener('click', () => {
-            const content = `--- AI ÇEVİRİ VE ANALİZ RAPORU ---\n\nORİJİNAL METİN:\n${rawOriginalText || originalTextEl.textContent}\n\nÇEVİRİ / ANALİZ (${targetLanguageSelect.value}):\n${rawTranslatedText || translatedTextEl.textContent}`;
+        function closeHistoryModal() {
+            const modal = document.getElementById('historyModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function renderHistoryList() {
+            const container = document.getElementById('historyListContainer');
+            document.getElementById('historyCount').textContent = translationHistory.length;
+
+            if (translationHistory.length === 0) {
+                container.innerHTML = `<div class="text-center py-8 text-stone-400 text-xs">Henüz yapılmış bir çeviri yok.</div>`;
+                return;
+            }
+
+            container.innerHTML = translationHistory.map(item => `
+                <div class="bg-stone-50 p-3 rounded-xl border border-stone-200 text-xs flex flex-col gap-1.5 cursor-pointer hover:border-amber-400 transition-colors" onclick="loadFromHistory(${item.id})">
+                    <div class="flex items-center justify-between text-stone-400 text-[10px]">
+                        <span>${item.date}</span>
+                        <span class="bg-amber-100 text-amber-800 font-semibold px-1.5 py-0.5 rounded">${item.lang}</span>
+                    </div>
+                    <p class="font-semibold text-stone-800 truncate">${item.source}</p>
+                    <p class="text-stone-600 line-clamp-2">${item.translated}</p>
+                </div>
+            `).join('');
+        }
+
+        function loadFromHistory(id) {
+            const item = translationHistory.find(h => h.id === id);
+            if (!item) return;
+            rawSourceText = item.source;
+            rawTranslatedText = item.translated;
+            rawAnalysisText = "Geçmiş kaydında detaylı analiz saklanmıyor.";
+            renderResults(rawTranslatedText, rawAnalysisText);
+            closeHistoryModal();
+            showToast('Geçmiş çeviri yüklendi.');
+        }
+
+        function clearHistory() {
+            translationHistory = [];
+            localStorage.setItem('ai_app_history', JSON.stringify(translationHistory));
+            renderHistoryList();
+            showToast('Çeviri geçmişi temizlendi.');
+        }
+
+        function copyOutput() {
+            if (!rawTranslatedText) return;
+            const fullCopy = `=== YALIN ÇEVİRİ ===\n${rawTranslatedText}\n\n=== DETAYLI ANALİZ ===\n${rawAnalysisText}`;
+            navigator.clipboard.writeText(fullCopy).then(() => {
+                showToast('Çeviri ve analiz panoya kopyalandı.');
+            });
+        }
+
+        function downloadOutput() {
+            if (!rawTranslatedText) return;
+            const content = `=== YALIN ÇEVİRİ ===\n${rawTranslatedText}\n\n=== DETAYLI ANALİZ ===\n${rawAnalysisText}`;
             const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `ceviri_${targetLanguageSelect.value.toLowerCase()}.txt`;
-            document.body.appendChild(a);
+            a.download = 'ceviri_ve_analiz.txt';
             a.click();
-            document.body.removeChild(a);
             URL.revokeObjectURL(url);
-            showToast('Çeviri dosyası indirildi (.txt)!');
+        }
+
+        let currentSelectedText = '';
+
+        function setupSelectionListener() {
+            const popBtn = document.getElementById('addToDictPopBtn');
+
+            document.addEventListener('mouseup', (e) => {
+                if (e.target.closest('#addToDictPopBtn') || e.target.closest('#dictionaryModal') || e.target.closest('#historyModal')) return;
+                
+                const selection = window.getSelection();
+                const selected = selection.toString().trim();
+
+                if (selected.length > 0 && selected.length < 120) {
+                    currentSelectedText = selected;
+                    const range = selection.getRangeAt(0);
+                    const rect = range.getBoundingClientRect();
+
+                    popBtn.style.top = `${window.scrollY + rect.top - 12}px`;
+                    popBtn.style.left = `${window.scrollX + rect.left + (rect.width / 2)}px`;
+                    popBtn.classList.remove('hidden');
+                    popBtn.classList.add('flex');
+                } else {
+                    popBtn.classList.add('hidden');
+                    popBtn.classList.remove('flex');
+                }
+            });
+
+            popBtn.addEventListener('click', () => {
+                addWordToDictionary(currentSelectedText);
+                popBtn.classList.add('hidden');
+            });
+        }
+
+        async function addWordToDictionary(word) {
+            showToast(`"${word}" sözlüğe ekleniyor...`);
+            const targetLang = document.getElementById('targetLanguage').value;
+
+            try {
+                const prompt = `Kelime: "${word}"
+İstenen: Bu kelimenin Türkçe ve ${targetLang} dillerindeki karşılığını, kökünü (varsa) ve kısa açıklamasını JSON olarak üret.
+JSON Formatı: {"word":"${word}", "translation":"Anlamı", "root":"Kökü", "lang":"${targetLang}"}`;
+
+                const payload = { contents: [{ parts: [{ text: prompt }] }] };
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent`;
+                
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+                let entry = {
+                    id: Date.now(),
+                    word: word,
+                    translation: 'Sözlük Kaydı (' + new Date().toLocaleDateString() + ')',
+                    root: '-',
+                    targetLang: targetLang
+                };
+
+                if (text) {
+                    const jsonMatch = text.match(/\{[\s\S]*\}/);
+                    if (jsonMatch) {
+                        const parsed = JSON.parse(jsonMatch[0]);
+                        entry.translation = parsed.translation || entry.translation;
+                        entry.root = parsed.root || '-';
+                    }
+                }
+
+                dictionary.unshift(entry);
+                localStorage.setItem('ai_app_dictionary', JSON.stringify(dictionary));
+                updateDictBadge();
+                showToast(`"${word}" sözlüğe başarıyla eklendi!`);
+
+            } catch (e) {
+                dictionary.unshift({
+                    id: Date.now(),
+                    word: word,
+                    translation: 'Sözlük Kaydı',
+                    root: '-',
+                    targetLang: targetLang
+                });
+                localStorage.setItem('ai_app_dictionary', JSON.stringify(dictionary));
+                updateDictBadge();
+                showToast(`"${word}" sözlüğe eklendi.`);
+            }
+        }
+
+        function updateDictBadge() {
+            document.getElementById('dictBadge').textContent = dictionary.length;
+        }
+
+        document.getElementById('openDictionaryBtn').addEventListener('click', () => {
+            renderDictionaryList();
+            const modal = document.getElementById('dictionaryModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
         });
+
+        function closeDictionaryModal() {
+            const modal = document.getElementById('dictionaryModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function renderDictionaryList() {
+            const container = document.getElementById('dictListContainer');
+            const search = document.getElementById('dictSearchInput').value.toLowerCase();
+            
+            const filtered = dictionary.filter(item => 
+                item.word.toLowerCase().includes(search) || 
+                item.translation.toLowerCase().includes(search)
+            );
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="text-center py-8 text-stone-400 text-xs">Sözlükte kelime bulunamadı.</div>`;
+                return;
+            }
+
+            container.innerHTML = filtered.map(item => `
+                <div class="bg-stone-50 p-3 rounded-xl border border-stone-200 flex items-center justify-between text-xs">
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <span class="font-bold text-amber-900 text-sm">${item.word}</span>
+                            <span class="text-[10px] bg-stone-200 text-stone-600 px-1.5 py-0.5 rounded font-semibold">${item.targetLang || 'Dil'}</span>
+                            ${item.root !== '-' ? `<span class="text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-semibold">Kök: ${item.root}</span>` : ''}
+                        </div>
+                        <p class="text-stone-600 mt-1">${item.translation}</p>
+                    </div>
+                    <button onclick="deleteDictItem(${item.id})" class="text-stone-400 hover:text-rose-600 p-1.5 transition-colors">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function deleteDictItem(id) {
+            dictionary = dictionary.filter(item => item.id !== id);
+            localStorage.setItem('ai_app_dictionary', JSON.stringify(dictionary));
+            updateDictBadge();
+            renderDictionaryList();
+        }
+
+        function askClearDictionary() {
+            const modal = document.getElementById('confirmModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeConfirmModal() {
+            const modal = document.getElementById('confirmModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function confirmClearDictionary() {
+            dictionary = [];
+            localStorage.setItem('ai_app_dictionary', JSON.stringify(dictionary));
+            updateDictBadge();
+            renderDictionaryList();
+            closeConfirmModal();
+            showToast('Sözlük temizlendi.');
+        }
+
+        function downloadDictionary() {
+            if (dictionary.length === 0) return;
+            const content = dictionary.map(i => `${i.word} -> ${i.translation} (Dil: ${i.targetLang})`).join('\n');
+            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'sozlugum.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
     </script>
 </body>
 </html>
+```
